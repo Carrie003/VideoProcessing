@@ -1,0 +1,15 @@
+# Ignore everything
+*
+
+# But except..
+!.gitignore
+!imgpro.cpp
+!R2Image.cpp
+!R2Image.h
+!R2Pixel.cpp
+!R2Pixel.h
+!svd.cpp
+!svd.h
+
+#...even if they are in subdirectories
+!*/
