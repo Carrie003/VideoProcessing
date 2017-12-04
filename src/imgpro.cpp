@@ -143,8 +143,8 @@ main(int argc, char **argv)
 	else if (!strcmp(argv[i], "-video")) {
 		printf("Video processing started\n");
 
-		char inputName[100] = "../../videoinput/input%07d.jpg";
-		char outputName[100] = "../../videooutput/output%07d.jpg";
+		char inputName[100] = "videoinput/input%07d.jpg";
+		char outputName[100] = "videooutput/output%07d.jpg";
 
 		R2Image *mainImage = new R2Image();
 		char currentFilename[100];
@@ -162,7 +162,7 @@ main(int argc, char **argv)
 
 		// =============== VIDEO PROCESSING ===============
 
-		mainImage->Blur(3.0f);
+		mainImage->Brighten(3.0f);
 		// here you could call mainImage->FirstFrameProcessing( ); 
 		
 		int end = 88;
