@@ -162,8 +162,9 @@ main(int argc, char **argv)
 
 		// =============== VIDEO PROCESSING ===============
 
-		mainImage->Brighten(3.0f);
-		// here you could call mainImage->FirstFrameProcessing( ); 
+		// mainImage->Brighten(3.0f);
+		// here you could call mainImage->FirstFrameProcessing( );
+    mainImage -> FirstFrameProcessing(); 
 		
 		int end = 88;
 		for (int i = 1; i < end; i++)
@@ -183,10 +184,10 @@ main(int argc, char **argv)
 				exit(-1);
 			}
 
-			currentImage->Brighten((float)i/(float)end);
+			// currentImage->Brighten((float)i/(float)end);
 			// here you could call 
 			// 
-			// mainImage->FrameProcessing( currentImage ); 
+			 mainImage->FrameProcessing( currentImage ); 
 			//
 			// where FrameProcessing would process the current input currentImage, as well as writing the output to currentImage
 

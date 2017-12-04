@@ -355,6 +355,16 @@ blendOtherImageHomography(R2Image * otherImage)
 	return;
 }
 
+void R2Image::
+FirstFrameProcessing(){
+  return;
+}
+
+void R2Image::
+FrameProcessing(R2Image * otherImage){
+  return;
+}
+
 ////////////////////////////////////////////////////////////////////////
 // I/O Functions
 ////////////////////////////////////////////////////////////////////////
