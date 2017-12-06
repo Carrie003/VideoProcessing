@@ -641,12 +641,14 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
   R2Pixel *redPixel = new R2Pixel(1.0, 0.0, 0.0, 1.0);
   R2Pixel *greenPixel = new R2Pixel(0.0, 1.0, 0.0, 1.0);
 
-  int searchWidthHalf = 0.1*width;
-  int searchHeightHalf = 0.1*height;
+  int searchWidthHalf = 0.05*width;
+  int searchHeightHalf = 0.05*height;
 
   //for each feature detected in previous image
   for (int i = 0; i< prevStoredFeature.size(); i++){
     Feature curr = prevStoredFeature.at(i);
+    std::cout << "current i is " << i << std::endl;
+
     double bestDiff = 10000;
     int bestX = -10;
     int bestY = -10;
@@ -657,20 +659,22 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
         //the coordinates of second feature
         int currX = curr.centerX + searchX;
         int currY = curr.centerY + searchY;
-        //compare a small window in A at (curr.centerX, curr.centerY) with a small window in B
-        // at (currX, currY)
-        double currDiff = 0;
-        for (int ssdX = -5; ssdX < 6; ssdX++){
-          for (int ssdY = -5; ssdY < 6; ssdY++){
-            Feature second = Feature(currX+ssdX, currY+ssdY, image2.Pixel(currX+ssdX, currY+ssdY));
-            Feature first = Feature(curr.centerX+ssdX,curr.centerY+ssdY, image1.Pixel(curr.centerX+ssdX, curr.centerY+ssdY));
-            currDiff += first.difference(second);
+        if (currX >= 5 && currX < width-5 && currY >= 5 && currY < height-5){
+          double currDiff = 0;
+          //compare a small window in A at (curr.centerX, curr.centerY) with a small window in B
+          // at (currX, currY)
+          for (int ssdX = -5; ssdX < 6; ssdX++){
+            for (int ssdY = -5; ssdY < 6; ssdY++){
+              Feature second = Feature(currX+ssdX, currY+ssdY, image2.Pixel(currX+ssdX, currY+ssdY));
+              Feature first = Feature(curr.centerX+ssdX,curr.centerY+ssdY, image1.Pixel(curr.centerX+ssdX, curr.centerY+ssdY));
+              currDiff += first.difference(second);
+            }
           }
-        }
-        if (currDiff < bestDiff){
-          bestDiff = currDiff;
-          bestX = currX;
-          bestY = currY;
+          if (currDiff < bestDiff){
+            bestDiff = currDiff;
+            bestX = currX;
+            bestY = currY;
+          }
         }
       }
     }
