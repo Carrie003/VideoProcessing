@@ -349,20 +349,6 @@ Bilateral(double sigmaR, double sigmaD)
   }
 }
 
-struct PixelDifference
-{
-  R2Pixel pixel;
-  double difference;
-
-  PixelDifference(R2Pixel newP, double diff){
-    pixel = newP;
-    difference = diff;
-  }
-
-  bool operator<(const PixelDifference& pd) const{
-    return difference < pd.difference;
-  }
-};
 
 void R2Image::
 Median(int kernelSize, double sigma)
@@ -501,40 +487,6 @@ Harris(double sigma)
   
 }
 
-
-struct Feature
-{
-  // create a structure with custom data, and how to sort them fast.
-  int centerX;
-  int centerY;
-  R2Pixel HarrisValue;
-
-  Feature(int x, int y, R2Pixel val){
-    centerX = x;
-    centerY = y;
-    HarrisValue = val;
-  }
-
-  bool operator<(const Feature& feature) const{
-    double valueIntensity = HarrisValue[0]+HarrisValue[1]+HarrisValue[2];
-    double featureIntensity = feature.HarrisValue[0]+feature.HarrisValue[1]+feature.HarrisValue[2];
-    return valueIntensity < featureIntensity;
-  }
-
-  double difference(const Feature& feature) const{
-    double valueIntensity = HarrisValue[0]+HarrisValue[1]+HarrisValue[2];
-    double featureIntensity = feature.HarrisValue[0]+feature.HarrisValue[1]+feature.HarrisValue[2];
-    return (valueIntensity - featureIntensity)*(valueIntensity - featureIntensity);
-  }
-
-  double charScale(const Feature& feature) const{
-    double valueIntensity = HarrisValue[0]+HarrisValue[1]+HarrisValue[2];
-    double featureIntensity = feature.HarrisValue[0]+feature.HarrisValue[1]+feature.HarrisValue[2];
-    return (double)pow(valueIntensity,2)/(double)pow(featureIntensity,2);
-  }
-
-};
-
 void R2Image::
 FirstFrameProcessing()
 {
@@ -574,13 +526,13 @@ FirstFrameProcessing()
         Pixel(curr.centerX + a, curr.centerY + 5) = *redPixel;
         Pixel(curr.centerX - 5, curr.centerY + a) = *redPixel;
         Pixel(curr.centerX + 5, curr.centerY + a) = *redPixel;
-        
       }
+      prevStoredFeature.push_back(curr);
       i++;
     }
   }
 
-
+  std::cout << "prevStoredFeature size is " << prevStoredFeature.size() << std::endl;
 }
 
 
@@ -605,42 +557,7 @@ void R2Image::
 LensDistortion()
 {
   return;
-
 }
-
-struct FeaturePair
-{
-  // create a structure with custom data, and how to sort them fast.
-  int feat1X;
-  int feat1Y;
-  int feat2X;
-  int feat2Y;
-  int vectorX;
-  int vectorY;
-  double inlier;
-
-  FeaturePair(int x1, int y1, int x2, int y2, int x, int y, double in){
-    feat1X = x1;
-    feat1Y = y1;
-    feat2X = x2;
-    feat2Y = y2;
-    vectorX = x;
-    vectorY = y;
-    inlier = in;
-  }
-
-  double difference(const FeaturePair& pair) const{
-    int subtractX = vectorX - pair.vectorX;
-    int subtractY = vectorY - pair.vectorY;
-    return subtractY * subtractY + subtractX * subtractX;
-  }
-
-  bool operator<(const FeaturePair& currPair) const{
-    return inlier < currPair.inlier;
-  }
-
-};
-
 
 void R2Image::
 ScaleInvariantHarris(){
@@ -661,174 +578,7 @@ square(int a0, int a1, int b0, int b1, int c0, int c1, int d0, int d1)
 void R2Image::
 blendOtherImageTranslated(R2Image * otherImage)
 {
-  // find at least 100 features on this image, and another 100 on the "otherImage". Based on these,
-  // compute the matching translation (pixel precision is OK), and blend the translated "otherImage" 
-  // into this image with a 50% opacity.
-
-  R2Image image1 (*this);
-  R2Image image2 (*otherImage);
-
-  // finding features
-  image1.Harris(2);
-
-  std::vector<Feature> featureVec;
-  std::vector<Feature> feature1;
-  std::vector<Feature> feature2;
-  std::vector<FeaturePair> featurePairCurr;
-
-  R2Pixel *redPixel = new R2Pixel(1.0, 0.0, 0.0, 1.0);
-  R2Pixel *greenPixel = new R2Pixel(0.0, 1.0, 0.0, 1.0);
-  bool flag;
-
-  // setting the size of search window
-  int searchWidthHalf = 0.1*width;
-  int searchHeightHalf = 0.1*height;
-
-  for (int x = searchWidthHalf; x < width - searchWidthHalf; x++){
-    for (int y = searchHeightHalf; y < height -searchHeightHalf; y++){
-      featureVec.push_back(Feature(x,y,image1.Pixel(x,y)));
-    }
-  }
-
-  std::sort(featureVec.begin(), featureVec.end());
-  int i = 0;
-
-
-  //for each feature detected
-  while (i<150 && featureVec.size() > 0){
-    
-    // test printing
-    std::cout << "featureVec size is %d" << featureVec.size() << std::endl;
-
-    Feature curr = featureVec.back();
-    featureVec.pop_back();
-    flag = true;
-    for (int b = -5; b < 6; b++){
-      if (image1.Pixel(curr.centerX+b, curr.centerY+b) == *redPixel){
-        flag = false;
-      }
-      if (image1.Pixel(curr.centerX+10-b, curr.centerY+b) == *redPixel){
-        flag = false;
-      }
-    }
-    
-    if (flag){
-      // drawing the first feature 
-      for (int a = -5; a < 6; a++){
-        image1.Pixel(curr.centerX + a, curr.centerY - 5) = *redPixel;
-        image1.Pixel(curr.centerX + a, curr.centerY + 5) = *redPixel;
-        image1.Pixel(curr.centerX - 5, curr.centerY + a) = *redPixel;
-        image1.Pixel(curr.centerX + 5, curr.centerY + a) = *redPixel;
-      }
-        
-      
-      double bestDiff = 1000.0;  
-      int bestX = -10;
-      int bestY = -10;    
-      // loop through all coordinates within the search window
-      for (int searchX = -searchWidthHalf; searchX< searchWidthHalf; searchX++){
-        for (int searchY = -searchHeightHalf; searchY<searchHeightHalf; searchY++){
-
-          //the coordinates of second feature
-          int currX = curr.centerX + searchX;
-          int currY = curr.centerY + searchY;
-          //compare a small window in A at (curr.centerX, curr.centerY) with a small window in B
-          // at (currX, currY)
-
-          double currDiff = 0;
-
-          for (int ssdX = -5; ssdX < 6; ssdX++){
-            for (int ssdY = -5; ssdY < 6; ssdY++){
-              Feature second = Feature(currX+ssdX, currY+ssdY, image2.Pixel(currX+ssdX, currY+ssdY));
-              Feature first = Feature(curr.centerX+ssdX,curr.centerY+ssdY, Pixel(curr.centerX+ssdX, curr.centerY+ssdY));
-              currDiff += first.difference(second);
-            }
-          }
-
-          if (currDiff < bestDiff){
-            bestDiff = currDiff;
-            bestX = currX;
-            bestY = currY;
-          }
-        }
-      }
-      if (bestX >0 && bestY > 0){
-        feature1.push_back(Feature(curr.centerX, curr.centerY, Pixel(curr.centerX, curr.centerY))); 
-        feature2.push_back(Feature(bestX, bestY, image2.Pixel(bestX, bestY)));
-        int vectorx = abs(curr.centerX - bestX);
-        int vectory = abs(curr.centerY - bestY);
-        featurePairCurr.push_back(FeaturePair(curr.centerX, curr.centerY, bestX, bestY, vectorx, vectory, 0));
-      }
-      i++;
-    }
-  }
-
-  // draw the new graph
-  for(int x = 0; x < width; x++){
-    for (int y = 0; y < height; y++){
-      Pixel(x,y) = 0.5*Pixel(x,y) + 0.5*image2.Pixel(x,y);
-    }
-  }
-
-  // comparing feature pairs
-  // picking a pair each time
-  bool found = false;
-  FeaturePair bestPair = featurePairCurr.back();
-  for (int a = 0; a < featurePairCurr.size(); a++){
-    FeaturePair first = featurePairCurr.at(a);
-    int inlierNum = -1;
-
-    for (int b = 0; b < featurePairCurr.size(); b++){
-      FeaturePair curr = featurePairCurr.at(b);
-      if (first.difference(curr)<10){
-        inlierNum++;
-      }
-    }
-    if (inlierNum > 130){
-      found = true;
-      bestPair = first;
-    }
-  }
-  if(!found){
-    std::sort(featurePairCurr.begin(), featurePairCurr.end());
-    bestPair = featurePairCurr.at(0);
-  }
-
-  for (int i = 0; i < featurePairCurr.size(); i++){
-    FeaturePair currPair= featurePairCurr.at(i);
-    int x1 = currPair.feat1X;
-    int y1 = currPair.feat1Y;
-    int x2 = currPair.feat2X;
-    int y2 = currPair.feat2Y;
-    if (bestPair.difference(currPair)<10){
-      // decide the color to draw
-      line(x1, x2, y1, y2, 0.0, 1.0, 0.0);
-      for(int a = -5; a < 6; a++){
-        Pixel(x1 + a, y1 - 5) = *greenPixel;
-        Pixel(x1 + a, y1 + 5) = *greenPixel;
-        Pixel(x1 - 5, y1 + a) = *greenPixel;
-        Pixel(x1 + 5, y1 + a) = *greenPixel;
-        Pixel(x2 + a, y2 - 5) = *greenPixel;
-        Pixel(x2 + a, y2 + 5) = *greenPixel;
-        Pixel(x2 - 5, y2 + a) = *greenPixel;
-        Pixel(x2 + 5, y2 + a) = *greenPixel;
-      }
-    }else{
-      for(int a = -5; a < 6; a++){
-        Pixel(x1 + a, y1 - 5) = *redPixel;
-        Pixel(x1 + a, y1 + 5) = *redPixel;
-        Pixel(x1 - 5, y1 + a) = *redPixel;
-        Pixel(x1 + 5, y1 + a) = *redPixel;
-        Pixel(x2 + a, y2 - 5) = *redPixel;
-        Pixel(x2 + a, y2 + 5) = *redPixel;
-        Pixel(x2 - 5, y2 + a) = *redPixel;
-        Pixel(x2 + 5, y2 + a) = *redPixel;
-      }
-      line(x1, x2, y1, y2, 1.0, 0.0, 0.0);
-    }
-    
-  }
-
+  return;
 
 }
 
@@ -874,138 +624,61 @@ line(int x0, int x1, int y0, int y1, float r, float g, float b)
   }
 }
 
-// void R2Image::
-// computeHomography(void)
-// {
-//   R2Point points[] = {p1, p2, p3, p4, p5, p6, p7, p8};
-//   double** linEquations = dmatrix(1, 8, 1, 9);
-//   }
-//   for (int i = 0 ; i < 4; i++){
-//     linEquations[i*2+1][1] = -points[i*2][0];
-//     linEquations[i*2+1][2] = -points[i*2][1];
-//     linEquations[i*2+1][3] = -1.0;
-//     linEquations[i*2+1][4] = 0.0;
-//     linEquations[i*2+1][5] = 0.0;
-//     linEquations[i*2+1][6] = 0.0;
-//     linEquations[i*2+1][7] = points[i*2][0]*points[i*2+1][0];
-//     linEquations[i*2+1][8] = points[i*2][1]*points[i*2+1][0];
-//     linEquations[i*2+1][9] = points[i*2+1][0];
-
-//     linEquations[i*2+2][1] = 0.0;
-//     linEquations[i*2+2][2] = 0.0;
-//     linEquations[i*2+2][3] = 0.0;
-//     linEquations[i*2+2][4] = -points[i*2][0];
-//     linEquations[i*2+2][5] = -points[i*2][1];
-//     linEquations[i*2+2][6] = -1.0;
-//     linEquations[i*2+2][7] = points[i*2][0]*points[i*2+1][1];
-//     linEquations[i*2+2][8] = points[i*2][1]*points[i*2+1][1];
-//     linEquations[i*2+2][9] = points[i*2+1][1];
-//   }
-
-//   double singularValues[10];
-//   double** nullspaceMatrix = dmatrix(1, 9, 1, 9);
-//   svdcmp(linEquations, 8, 9, singularValues, nullspaceMatrix);
-
-//   printf("\n Singular values: %f, %f, %f, %f, %f, %f, %f, %f, %f\n",singularValues[1],singularValues[2],singularValues[3],
-//     singularValues[4],singularValues[5],singularValues[6],singularValues[7],singularValues[8],singularValues[9]);
-
-//   // find the smallest singular value:
-//   int smallestIndex = 1;
-//   for(int i=2;i<10;i++) if(singularValues[i]<singularValues[smallestIndex]) smallestIndex=i;
-
-//   // solution is the nullspace of the matrix, which is the column in V corresponding to the smallest singular value (which should be 0)
-//   printf("Conic coefficients: %f, %f, %f, %f, %f, %f, %f, %f, %f\n",nullspaceMatrix[1][smallestIndex],nullspaceMatrix[2][smallestIndex],
-//     nullspaceMatrix[3][smallestIndex],nullspaceMatrix[4][smallestIndex],nullspaceMatrix[5][smallestIndex],nullspaceMatrix[6][smallestIndex], 
-//     nullspaceMatrix[7][smallestIndex],nullspaceMatrix[8][smallestIndex],nullspaceMatrix[9][smallestIndex]);
-
-//   return;
-// }
-
 void R2Image::
-FrameProcessing(R2Image * otherImage)
+FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature> prevFeatures)
 {
-  // find at least 100 features on this image, and another 100 on the "otherImage". Based on these,
-  // compute the matching homography, and blend the transformed "otherImage" into this image with a 50% opacity.
 
-  R2Image image1 (*this);
-  R2Image temp(*this);
-  R2Image image2 (*otherImage);
+  R2Image image1 (*prevImage);
+  R2Image image2 (*currentImage);
 
-  // finding features
   image1.Harris(2);
+  image2.Harris(2);
 
-  std::vector<Feature> featureVec;
-  std::vector<Feature> feature1;
-  std::vector<Feature> feature2;
+  prevStoredFeature = prevFeatures;
+  currStoredFeature.clear();
+  std::cout << "prevStoredFeature size is " << prevStoredFeature.size() << std::endl;
 
   R2Pixel *redPixel = new R2Pixel(1.0, 0.0, 0.0, 1.0);
   R2Pixel *greenPixel = new R2Pixel(0.0, 1.0, 0.0, 1.0);
-  bool flag;
+
   int searchWidthHalf = 0.1*width;
   int searchHeightHalf = 0.1*height;
-  for (int x = searchWidthHalf; x < width - searchWidthHalf; x++){
-    for (int y = searchHeightHalf; y < height -searchHeightHalf; y++){
-      featureVec.push_back(Feature(x,y,image1.Pixel(x,y)));
-    }
-  }
-  std::sort(featureVec.begin(), featureVec.end());
-  int i = 0;
-  //for each feature detected
-  while (i<150 && featureVec.size() > 0){
-    
-    // test printing
-    //std::cout << "featureVec size is %d" << featureVec.size() << std::endl;
 
-    Feature curr = featureVec.back();
-    featureVec.pop_back();
-    flag = true;
-    for (int b = -5; b < 6; b++){
-      if (image1.Pixel(curr.centerX+b, curr.centerY+b) == *redPixel){
-        flag = false;
-      }
-      if (image1.Pixel(curr.centerX+10-b, curr.centerY+b) == *redPixel){
-        flag = false;
-      }
-    }
-    
-    if (flag){
-      // drawing the first feature 
-      for (int a = -5; a < 6; a++){
-        image1.Pixel(curr.centerX + a, curr.centerY - 5) = *redPixel;
-        image1.Pixel(curr.centerX + a, curr.centerY + 5) = *redPixel;
-        image1.Pixel(curr.centerX - 5, curr.centerY + a) = *redPixel;
-        image1.Pixel(curr.centerX + 5, curr.centerY + a) = *redPixel;
-      }
-      double bestDiff = 1000.0;  
-      int bestX = -10;
-      int bestY = -10;    
-      // loop through all coordinates within the search window
-      for (int searchX = -searchWidthHalf; searchX< searchWidthHalf; searchX++){
-        for (int searchY = -searchHeightHalf; searchY<searchHeightHalf; searchY++){
-          int currX = curr.centerX + searchX;
-          int currY = curr.centerY + searchY;
-          double currDiff = 0;
-          for (int ssdX = -5; ssdX < 6; ssdX++){
-            for (int ssdY = -5; ssdY < 6; ssdY++){
-              Feature second = Feature(currX+ssdX, currY+ssdY, image2.Pixel(currX+ssdX, currY+ssdY));
-              Feature first = Feature(curr.centerX+ssdX,curr.centerY+ssdY, Pixel(curr.centerX+ssdX, curr.centerY+ssdY));
-              currDiff += first.difference(second);
-            }
-          }
-          if (currDiff < bestDiff){
-            bestDiff = currDiff;
-            bestX = currX;
-            bestY = currY;
+  //for each feature detected in previous image
+  for (int i = 0; i< prevStoredFeature.size(); i++){
+    Feature curr = prevStoredFeature.at(i);
+    double bestDiff = 10000;
+    int bestX = -10;
+    int bestY = -10;
+    // loop through all coordinates within the search window
+    for (int searchX = -searchWidthHalf; searchX< searchWidthHalf; searchX++){
+      for (int searchY = -searchHeightHalf; searchY<searchHeightHalf; searchY++){
+
+        //the coordinates of second feature
+        int currX = curr.centerX + searchX;
+        int currY = curr.centerY + searchY;
+        //compare a small window in A at (curr.centerX, curr.centerY) with a small window in B
+        // at (currX, currY)
+        double currDiff = 0;
+        for (int ssdX = -5; ssdX < 6; ssdX++){
+          for (int ssdY = -5; ssdY < 6; ssdY++){
+            Feature second = Feature(currX+ssdX, currY+ssdY, image2.Pixel(currX+ssdX, currY+ssdY));
+            Feature first = Feature(curr.centerX+ssdX,curr.centerY+ssdY, image1.Pixel(curr.centerX+ssdX, curr.centerY+ssdY));
+            currDiff += first.difference(second);
           }
         }
+        if (currDiff < bestDiff){
+          bestDiff = currDiff;
+          bestX = currX;
+          bestY = currY;
+        }
       }
-      if (bestX >0 && bestY > 0){
-        feature1.push_back(Feature(curr.centerX, curr.centerY, Pixel(curr.centerX, curr.centerY))); 
-        feature2.push_back(Feature(bestX, bestY, image2.Pixel(bestX, bestY)));
-      }
-      i++;
     }
+    Feature best = Feature(bestX, bestY, image2.Pixel(bestX, bestY));
+    currStoredFeature.push_back(best);
   }
+  std::cout << "prevStoredFeature size is " << prevStoredFeature.size() << std::endl;
+  std::cout << "currStoredFeature size is " << currStoredFeature.size() << std::endl;
 
   double** HMatrix = dmatrix(1,3,1,3);
   double** newHMatrix = dmatrix(1,3,1,3);
@@ -1016,9 +689,9 @@ FrameProcessing(R2Image * otherImage)
     std::vector<Feature> random1;
     std::vector<Feature> random2;
     for (int i = 0; i < 4; i++){
-      int randomIndex = int(rand()%150);
-      random1.push_back(feature1.at(randomIndex));
-      random2.push_back(feature2.at(randomIndex));
+      int randomIndex = int(rand()%currStoredFeature.size());
+      random1.push_back(prevStoredFeature.at(randomIndex));
+      random2.push_back(currStoredFeature.at(randomIndex));
     }
 
     R2Point p1(random1.at(0).centerX, random1.at(0).centerY);
@@ -1075,11 +748,11 @@ FrameProcessing(R2Image * otherImage)
 
     // find the number of inliers
     int inlier = 0;
-    for (int num = 0; num < feature1.size(); num++){
-      int x1 = feature1.at(num).centerX;
-      int y1 = feature1.at(num).centerY;
-      int x2 = feature2.at(num).centerX;
-      int y2 = feature2.at(num).centerY;
+    for (int num = 0; num < prevStoredFeature.size(); num++){
+      int x1 = prevStoredFeature.at(num).centerX;
+      int y1 = prevStoredFeature.at(num).centerY;
+      int x2 = currStoredFeature.at(num).centerX;
+      int y2 = currStoredFeature.at(num).centerY;
       double hpointZ = homographyMatrix[3][1]*x1+homographyMatrix[3][2]*y1+homographyMatrix[3][3];
       double hpointX = (homographyMatrix[1][1]*x1+homographyMatrix[1][2]*y1+homographyMatrix[1][3])/hpointZ;
       double hpointY = (homographyMatrix[2][1]*x1+homographyMatrix[2][2]*y1+homographyMatrix[2][3])/hpointZ;
@@ -1097,11 +770,11 @@ FrameProcessing(R2Image * otherImage)
   }  
   std::vector<R2Point> matchPoints;
 
-  for (int num = 0; num < feature1.size(); num++){
-    int x1 = feature1.at(num).centerX;
-    int y1 = feature1.at(num).centerY;
-    int x2 = feature2.at(num).centerX;
-    int y2 = feature2.at(num).centerY;
+  for (int num = 0; num < prevStoredFeature.size(); num++){
+    int x1 = prevStoredFeature.at(num).centerX;
+    int y1 = prevStoredFeature.at(num).centerY;
+    int x2 = currStoredFeature.at(num).centerX;
+    int y2 = currStoredFeature.at(num).centerY;
     double hpointZ = HMatrix[3][1]*x1 + HMatrix[3][2]*y1 + HMatrix[3][3];
     double hpointX = (HMatrix[1][1]*x1+HMatrix[1][2]*y1+HMatrix[1][3])/hpointZ;
     double hpointY = (HMatrix[2][1]*x1+HMatrix[2][2]*y1+HMatrix[2][3])/hpointZ;
@@ -1112,7 +785,7 @@ FrameProcessing(R2Image * otherImage)
     }
 
     int size = matchPoints.size();
-    std::cout << "size is " << size << std::endl;
+
     double** linearEquations = dmatrix(1, size, 1, 9);
     for (int i = 0 ; i < (int)(size/2); i++){
       linearEquations[i*2+1][1] = -matchPoints.at(i*2)[0];
@@ -1154,24 +827,13 @@ FrameProcessing(R2Image * otherImage)
     newHMatrix[3][3] = nullMatrix[9][smallestIndex];
   }
 
-  // //draw the graph
-  // for(int x = 0; x < width; x++){
-  //   for(int y = 0; y < height; y++){
-  //     double img2Z = newHMatrix[3][1]*x+newHMatrix[3][2]*y+newHMatrix[3][3];
-  //     double img2X = ((newHMatrix[1][1]*x+newHMatrix[1][2]*y+newHMatrix[1][3])/img2Z);
-  //     double img2Y = ((newHMatrix[2][1]*x+newHMatrix[2][2]*y+newHMatrix[2][3])/img2Z);
-  //     if(img2X>=0 and img2X < width and img2Y>=0 and img2Y <height){
-  //       Pixel(x,y) = 0.5*temp.Pixel(x,y) + 0.5*image2.Pixel(img2X,img2Y);
-  //     }
-  //   }
-  // }
-
+  std::vector<Feature> temp;
   //draw the feature pairs
-  for (int num = 0; num < 150; num++){
-    int x1 = feature1.at(num).centerX;
-    int y1 = feature1.at(num).centerY;
-    int x2 = feature2.at(num).centerX;
-    int y2 = feature2.at(num).centerY;
+  for (int num = 0; num < currStoredFeature.size(); num++){
+    int x1 = prevStoredFeature.at(num).centerX;
+    int y1 = prevStoredFeature.at(num).centerY;
+    int x2 = currStoredFeature.at(num).centerX;
+    int y2 = currStoredFeature.at(num).centerY;
     double hpointZ = HMatrix[3][1]*x1+HMatrix[3][2]*y1+HMatrix[3][3];
     double hpointX = (HMatrix[1][1]*x1+HMatrix[1][2]*y1+HMatrix[1][3])/hpointZ;
     double hpointY = (HMatrix[2][1]*x1+HMatrix[2][2]*y1+HMatrix[2][3])/hpointZ;
@@ -1179,35 +841,34 @@ FrameProcessing(R2Image * otherImage)
     std::cout << "difference is " << difference << std::endl;
     if(difference < 5){
       // draw them green
+      temp.push_back(currStoredFeature.at(num));
       for(int a = -5; a < 6; a++){
-        otherImage->Pixel(x1 + a, y1 - 5) = *greenPixel;
-        otherImage->Pixel(x1 + a, y1 + 5) = *greenPixel;
-        otherImage->Pixel(x1 - 5, y1 + a) = *greenPixel;
-        otherImage->Pixel(x1 + 5, y1 + a) = *greenPixel;
-        otherImage->Pixel(x2 + a, y2 - 5) = *greenPixel;
-        otherImage->Pixel(x2 + a, y2 + 5) = *greenPixel;
-        otherImage->Pixel(x2 - 5, y2 + a) = *greenPixel;
-        otherImage->Pixel(x2 + 5, y2 + a) = *greenPixel;
+        currentImage->Pixel(x1 + a, y1 - 5) = *greenPixel;
+        currentImage->Pixel(x1 + a, y1 + 5) = *greenPixel;
+        currentImage->Pixel(x1 - 5, y1 + a) = *greenPixel;
+        currentImage->Pixel(x1 + 5, y1 + a) = *greenPixel;
+        currentImage->Pixel(x2 + a, y2 - 5) = *greenPixel;
+        currentImage->Pixel(x2 + a, y2 + 5) = *greenPixel;
+        currentImage->Pixel(x2 - 5, y2 + a) = *greenPixel;
+        currentImage->Pixel(x2 + 5, y2 + a) = *greenPixel;
       }
-      otherImage->line(x1, x2, y1, y2, 0.0, 1.0, 0.0);
+      currentImage->line(x1, x2, y1, y2, 0.0, 1.0, 0.0);
     }else{
       for(int a = -5; a < 6; a++){
-        otherImage->Pixel(x1 + a, y1 - 5) = *redPixel;
-        otherImage->Pixel(x1 + a, y1 + 5) = *redPixel;
-        otherImage->Pixel(x1 - 5, y1 + a) = *redPixel;
-        otherImage->Pixel(x1 + 5, y1 + a) = *redPixel;
-        otherImage->Pixel(x2 + a, y2 - 5) = *redPixel;
-        otherImage->Pixel(x2 + a, y2 + 5) = *redPixel;
-        otherImage->Pixel(x2 - 5, y2 + a) = *redPixel;
-        otherImage->Pixel(x2 + 5, y2 + a) = *redPixel;
+        currentImage->Pixel(x1 + a, y1 - 5) = *redPixel;
+        currentImage->Pixel(x1 + a, y1 + 5) = *redPixel;
+        currentImage->Pixel(x1 - 5, y1 + a) = *redPixel;
+        currentImage->Pixel(x1 + 5, y1 + a) = *redPixel;
+        currentImage->Pixel(x2 + a, y2 - 5) = *redPixel;
+        currentImage->Pixel(x2 + a, y2 + 5) = *redPixel;
+        currentImage->Pixel(x2 - 5, y2 + a) = *redPixel;
+        currentImage->Pixel(x2 + 5, y2 + a) = *redPixel;
       }
-      otherImage->line(x1, x2, y1, y2, 1.0, 0.0, 0.0);
+      currentImage->line(x1, x2, y1, y2, 1.0, 0.0, 0.0);
     }
   }
 
-
-
-
+  prevStoredFeature = temp;
 }
 
 ////////////////////////////////////////////////////////////////////////

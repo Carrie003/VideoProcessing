@@ -2,6 +2,8 @@
 #ifndef R2_IMAGE_INCLUDED
 #define R2_IMAGE_INCLUDED
 
+#include "vector"
+
 
 
 // Constant definitions
@@ -60,6 +62,89 @@ class R2Image {
   void line(int x0, int x1, int y0, int y1, float r, float g, float b);
   void square(int a0, int a1, int b0, int b1, int c0, int c1, int d0, int d1); 
 
+  public:
+  struct Feature
+  {
+    // create a structure with custom data, and how to sort them fast.
+    int centerX;
+    int centerY;
+    R2Pixel HarrisValue;
+
+    Feature(int x, int y, R2Pixel val){
+      centerX = x;
+      centerY = y;
+      HarrisValue = val;
+    }
+
+    bool operator<(const Feature& feature) const{
+      double valueIntensity = HarrisValue[0]+HarrisValue[1]+HarrisValue[2];
+      double featureIntensity = feature.HarrisValue[0]+feature.HarrisValue[1]+feature.HarrisValue[2];
+      return valueIntensity < featureIntensity;
+    }
+
+    double difference(const Feature& feature) const{
+      double valueIntensity = HarrisValue[0]+HarrisValue[1]+HarrisValue[2];
+      double featureIntensity = feature.HarrisValue[0]+feature.HarrisValue[1]+feature.HarrisValue[2];
+      return (valueIntensity - featureIntensity)*(valueIntensity - featureIntensity);
+    }
+
+    double charScale(const Feature& feature) const{
+      double valueIntensity = HarrisValue[0]+HarrisValue[1]+HarrisValue[2];
+      double featureIntensity = feature.HarrisValue[0]+feature.HarrisValue[1]+feature.HarrisValue[2];
+      return (double)pow(valueIntensity,2)/(double)pow(featureIntensity,2);
+    }
+
+  };
+
+  struct PixelDifference
+  {
+    R2Pixel pixel;
+    double difference;
+
+    PixelDifference(R2Pixel newP, double diff){
+      pixel = newP;
+      difference = diff;
+    }
+
+    bool operator<(const PixelDifference& pd) const{
+      return difference < pd.difference;
+    }
+  };
+
+
+  struct FeaturePair
+  {
+    // create a structure with custom data, and how to sort them fast.
+    int feat1X;
+    int feat1Y;
+    int feat2X;
+    int feat2Y;
+    int vectorX;
+    int vectorY;
+    double inlier;
+
+    FeaturePair(int x1, int y1, int x2, int y2, int x, int y, double in){
+      feat1X = x1;
+      feat1Y = y1;
+      feat2X = x2;
+      feat2Y = y2;
+      vectorX = x;
+      vectorY = y;
+      inlier = in;
+    }
+
+    double difference(const FeaturePair& pair) const{
+      int subtractX = vectorX - pair.vectorX;
+      int subtractY = vectorY - pair.vectorY;
+      return subtractY * subtractY + subtractX * subtractX;
+    }
+
+    bool operator<(const FeaturePair& currPair) const{
+      return inlier < currPair.inlier;
+    }
+
+  };
+
   // Image processing
   R2Image& operator=(const R2Image& image);
 
@@ -95,7 +180,7 @@ class R2Image {
 
   // video operations
   void FirstFrameProcessing();
-  void FrameProcessing(R2Image * otherImage);
+  void FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature> temp);
 
   // File reading/writing
   int Read(const char *filename);
@@ -117,9 +202,12 @@ class R2Image {
   int npixels;
   int width;
   int height;
+
+  public:
+    std::vector<Feature> prevStoredFeature;
+    std::vector<Feature> currStoredFeature;
+
 };
-
-
 
 // Inline functions
 

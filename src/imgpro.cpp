@@ -165,12 +165,14 @@ main(int argc, char **argv)
 
 		// mainImage->Brighten(3.0f);
 		// here you could call mainImage->FirstFrameProcessing( );
-    // mainImage -> FirstFrameProcessing(); 
+    mainImage -> FirstFrameProcessing(); 
+    std::vector<R2Image::Feature> prevFeatures = mainImage->prevStoredFeature;
 		
 		int end = 88;
 		for (int i = 1; i < end; i++)
 		{
 			R2Image *currentImage = new R2Image();
+      R2Image *prevImage = new R2Image();
 			if (!currentImage) {
 				fprintf(stderr, "Unable to allocate image %d\n",i);
 				exit(-1);
@@ -185,7 +187,7 @@ main(int argc, char **argv)
 				fprintf(stderr, "Unable to read image %d\n", i);
 				exit(-1);
 			}
-      if (!mainImage->Read(prevFilename)) {
+      if (!prevImage->Read(prevFilename)) {
         fprintf(stderr, "Unable to read image %d\n", i);
         exit(-1);
       }
@@ -193,7 +195,8 @@ main(int argc, char **argv)
 			// currentImage->Brighten((float)i/(float)end);
 			// here you could call 
 			// 
-			 mainImage->FrameProcessing( currentImage ); 
+			 mainImage->FrameProcessing(prevImage, currentImage, prevFeatures); 
+       prevFeatures = mainImage -> prevStoredFeature;
 			//
 			// where FrameProcessing would process the current input currentImage, as well as writing the output to currentImage
 
@@ -204,7 +207,7 @@ main(int argc, char **argv)
 			}
 			delete currentImage;
 		}
-		delete mainImage;
+		//delete mainImage;
 		// Return success
 		return EXIT_SUCCESS;
 	}
