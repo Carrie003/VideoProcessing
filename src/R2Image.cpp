@@ -368,37 +368,7 @@ void R2Image::
 Median(int kernelSize, double sigma)
 {
   R2Image temp(*this);
-
-  // int cutSize = int(kernelSize * sigma);
   int halfKernel = int(kernelSize/2);
-
-  // for (int x = halfKernel; x < (int)(width - halfKernel)/3; x++){
-  //   for (int y = halfKernel; y < height - halfKernel; y++){
-  //     std::vector<PixelDifference> currKernel;
-  //     for (int a = -halfKernel; a < halfKernel+1; a++){
-  //       for (int b = -halfKernel; b < halfKernel+1; b++){
-  //         R2Pixel curr = temp.Pixel(x+a, y+b);
-  //         double difference = pow(curr[0],2)+pow(curr[1],2)+pow(curr[2],2);
-  //         currKernel.push_back(PixelDifference(curr, difference));
-  //       }
-  //     }
-  //     std::sort(currKernel.begin(), currKernel.end());
-
-  //     std::vector<R2Pixel> acceptPixels;
-  //     for (int i = cutSize; i< currKernel.size()-cutSize; i++){
-  //       acceptPixels.push_back(currKernel.at(i).pixel);
-  //     }
-
-  //     Pixel(x,y).Reset(0.0,0.0,0.0,0.0);
-  //     int num = 0;
-  //     for (int j = 0; j<acceptPixels.size(); j++){
-  //       Pixel(x,y) += acceptPixels.at(j);
-  //       num +=1;
-  //     }
-  //     Pixel(x,y)/=num;
-  //   }
-  // }
-
   for (int x = halfKernel; x <(int)(width - halfKernel)/3; x++){
     for (int y = halfKernel; y < height - halfKernel; y++){
       std::vector<PixelDifference> currKernel;
@@ -622,17 +592,6 @@ Sharpen()
   R2Image blur(*this);
   R2Image temp(*this);
 
-  // for (int x = 1; x < width -1; x++){
-  //   for (int y = 1; y < height -1; y++){
-  //     Pixel(x,y) *= 5;
-  //     Pixel(x,y) = Pixel(x,y)- tempImage.Pixel(x, y-1);
-  //     Pixel(x,y) = Pixel(x,y) - tempImage.Pixel(x-1,y) - tempImage.Pixel(x+1, y);
-  //     Pixel(x,y) = Pixel(x,y) - tempImage.Pixel(x, y+1);
-
-  //     Pixel(x,y).Clamp();
-  //   }
-  // }
-
   blur.Blur(5);
   for (int x = 0; x < width; x++){
     for (int y = 0; y < height; y++){
@@ -645,35 +604,7 @@ Sharpen()
 void R2Image::
 LensDistortion()
 {
-  R2Image temp(*this);
-
-  for(int i = 0; i < width; i++){
-    for (int j = 0; j < height; j++){
-      int x = i - width/2;
-      int y = j - height/2;
-
-      double radius = sqrt(pow(x,2)+pow(y,2));
-      double factor = sqrt(1-(pow(radius/width, 1.5)));
-
-      int xold = (int)x/factor/1.25;
-      int yold = (int)y/factor/1.25;
-      int iold = width/2+xold;
-      int jold = height/2+yold;
-      if (iold<0){
-        iold = 0;
-      }
-      if (iold >= width){
-        iold = width -1;
-      }
-      if (jold < 0){
-        jold =0;
-      }
-      if (jold>= height){
-        jold = height -1;
-      }
-      Pixel(i, j) = temp.Pixel(iold,jold);
-    }
-  }
+  return;
 
 }
 
@@ -713,33 +644,7 @@ struct FeaturePair
 
 void R2Image::
 ScaleInvariantHarris(){
-  for (int i = 5; i < 20; i++){
-    R2Image harrisImage(*this);
-    harrisImage.Harris(i);
-    std::vector<Feature> featureVec;
-
-    for (int x = 0; x < width; x++){
-      for (int y = 0; y < height; y++){
-        featureVec.push_back(Feature(x,y,harrisImage.Pixel(x,y)));
-      }
-    }
-    std::sort(featureVec.begin(), featureVec.end());
-    std::cout << "featureVec size is " << featureVec.size() << std::endl;
-    Feature firstFeat = featureVec.back();
-    featureVec.pop_back();
-    // std::cout << "featureVec size is " << featureVec.size() << std::endl;
-
-    int featureX = firstFeat.centerX;
-    int featureY = firstFeat.centerY;
-    std::cout << "featureX is " << featureX << std::endl;
-    std::cout << "featureY is " << featureY << std::endl;
-    Feature secondFeat = featureVec.back();
-    std::cout << "featureX is " << secondFeat.centerX << std::endl;
-    std::cout << "featureY is " << secondFeat.centerY << std::endl;
-    double charScale = firstFeat.charScale(secondFeat);
-    std::cout << "charScale is " << charScale << std::endl;
-    square(featureX-charScale, featureY+charScale, featureX+charScale, featureY+charScale, featureX+charScale, featureY-charScale, featureX-charScale, featureY-charScale);
-  }
+  return;
 
 }
 

@@ -149,6 +149,7 @@ main(int argc, char **argv)
 		R2Image *mainImage = new R2Image();
 		char currentFilename[100];
 		char currentOutputFilename[100];
+    char prevFilename[100];
 		if (!mainImage) {
 			fprintf(stderr, "Unable to allocate image\n");
 			exit(-1);
@@ -177,12 +178,17 @@ main(int argc, char **argv)
 
 			sprintf(currentFilename, inputName, i);
 			sprintf(currentOutputFilename, outputName, i);
+      sprintf(prevFilename, inputName, i-1);
 			
 			printf("Processing file %s\n", currentFilename);
 			if (!currentImage->Read(currentFilename)) {
 				fprintf(stderr, "Unable to read image %d\n", i);
 				exit(-1);
 			}
+      if (!mainImage->Read(prevFilename)) {
+        fprintf(stderr, "Unable to read image %d\n", i);
+        exit(-1);
+      }
 
 			// currentImage->Brighten((float)i/(float)end);
 			// here you could call 
