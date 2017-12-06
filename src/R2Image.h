@@ -56,6 +56,10 @@ class R2Image {
   const R2Pixel *operator[](int row) const;
   void SetPixel(int x, int y,  const R2Pixel& pixel);
 
+  // additional functionality
+  void line(int x0, int x1, int y0, int y1, float r, float g, float b);
+  void square(int a0, int a1, int b0, int b1, int c0, int c1, int d0, int d1); 
+
   // Image processing
   R2Image& operator=(const R2Image& image);
 
@@ -73,10 +77,21 @@ class R2Image {
   void Blur(double sigma);
   void Harris(double sigma);
   void Sharpen(void);
+  void FeatureDetection();
+
 
   // further operations
   void blendOtherImageTranslated(R2Image * otherImage);
   void blendOtherImageHomography(R2Image * otherImage);
+
+  void computeHomography(R2Point p1, R2Point p2, R2Point p3, R2Point p4, R2Point p5, R2Point p6, R2Point p7, R2Point p8);
+
+
+  // Non Linear filtering operations
+  void Bilateral(double sigma, double tolerance);
+  void Median(int kernelSize, double sigma);
+  void LensDistortion();
+  void ScaleInvariantHarris();
 
   // video operations
   void FirstFrameProcessing();

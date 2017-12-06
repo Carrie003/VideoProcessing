@@ -164,7 +164,7 @@ main(int argc, char **argv)
 
 		// mainImage->Brighten(3.0f);
 		// here you could call mainImage->FirstFrameProcessing( );
-    mainImage -> FirstFrameProcessing(); 
+    // mainImage -> FirstFrameProcessing(); 
 		
 		int end = 88;
 		for (int i = 1; i < end; i++)
