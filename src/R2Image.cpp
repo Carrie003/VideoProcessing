@@ -508,7 +508,7 @@ FirstFrameProcessing()
   std::sort(featureVec.begin(), featureVec.end());
 
   int i = 0;
-  while (i<150 && featureVec.size() > 0){
+  while (i<400 && featureVec.size() > 0){
     Feature curr = featureVec.back();
     featureVec.pop_back();
 
@@ -631,9 +631,6 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
   R2Image image1 (*prevImage);
   R2Image image2 (*currentImage);
 
-  image1.Harris(2);
-  image2.Harris(2);
-
   prevStoredFeature = prevFeatures;
   currStoredFeature.clear();
   std::cout << "prevStoredFeature size is " << prevStoredFeature.size() << std::endl;
@@ -641,13 +638,13 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
   R2Pixel *redPixel = new R2Pixel(1.0, 0.0, 0.0, 1.0);
   R2Pixel *greenPixel = new R2Pixel(0.0, 1.0, 0.0, 1.0);
 
-  int searchWidthHalf = 0.05*width;
-  int searchHeightHalf = 0.05*height;
+  int searchWidthHalf = 0.02*width;
+  int searchHeightHalf = 0.02*height;
 
   //for each feature detected in previous image
   for (int i = 0; i< prevStoredFeature.size(); i++){
     Feature curr = prevStoredFeature.at(i);
-    std::cout << "current i is " << i << std::endl;
+    //std::cout << "current i is " << i << std::endl;
 
     double bestDiff = 10000;
     int bestX = -10;
