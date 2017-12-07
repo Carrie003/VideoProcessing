@@ -505,32 +505,63 @@ FirstFrameProcessing()
     }
   }
 
-  std::sort(featureVec.begin(), featureVec.end());
+   std::sort(featureVec.begin(), featureVec.end());
 
-  int i = 0;
-  while (i<400 && featureVec.size() > 0){
-    Feature curr = featureVec.back();
-    featureVec.pop_back();
 
-    flag = true;
+
+  // int i = 0;
+  // while (i<400 && featureVec.size() > 0){
+  //   Feature curr = featureVec.back();
+  //   featureVec.pop_back();
+
+  //   flag = true;
     
-    for (int b = -5; b < 6; b++){
-      if (Pixel(curr.centerX+b, curr.centerY+b) == *redPixel){
-        flag = false;
-      }
-    }
+  //   for (int b = -5; b < 6; b++){
+  //     if (Pixel(curr.centerX+b, curr.centerY+b) == *redPixel){
+  //       flag = false;
+  //     }
+  //   }
     
-    if (flag){
-      for (int a = -5; a < 6; a++){
-        Pixel(curr.centerX + a, curr.centerY - 5) = *redPixel;
-        Pixel(curr.centerX + a, curr.centerY + 5) = *redPixel;
-        Pixel(curr.centerX - 5, curr.centerY + a) = *redPixel;
-        Pixel(curr.centerX + 5, curr.centerY + a) = *redPixel;
+  //   if (flag){
+  //     for (int a = -5; a < 6; a++){
+  //       Pixel(curr.centerX + a, curr.centerY - 5) = *redPixel;
+  //       Pixel(curr.centerX + a, curr.centerY + 5) = *redPixel;
+  //       Pixel(curr.centerX - 5, curr.centerY + a) = *redPixel;
+  //       Pixel(curr.centerX + 5, curr.centerY + a) = *redPixel;
+  //     }
+  //     prevStoredFeature.push_back(curr);
+  //     i++;
+  //   }
+  // }
+
+  int count = 0;
+  int index = featureVec.size()-1;
+  
+  while (count < 400){
+    bool validPoint = true;
+    int x = featureVec[index].centerX;
+    int y = featureVec[index].centerY;
+    int k = 0;
+    while (validPoint && k < prevStoredFeature.size()){
+      if (abs(x-prevStoredFeature[k].centerX) < 50 && abs(y-prevStoredFeature[k].centerY) < 50){
+        validPoint = false;
       }
-      prevStoredFeature.push_back(curr);
-      i++;
+      k++;
     }
+    if (validPoint && x > 5 && x < width - 6 && y > 5 && y < height - 6) {
+      for(int i = -3; i < 4; i++){
+        for(int j = -3; j < 4; j++){
+            Pixel(x+i,y+j).Reset(1,0,0,0);
+        }
+      }
+      count++;
+      prevStoredFeature.push_back(featureVec[index]);
+    }
+    index--;
   }
+
+
+
 
   std::cout << "prevStoredFeature size is " << prevStoredFeature.size() << std::endl;
 }
@@ -780,7 +811,7 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
     double hpointX = (HMatrix[1][1]*x1+HMatrix[1][2]*y1+HMatrix[1][3])/hpointZ;
     double hpointY = (HMatrix[2][1]*x1+HMatrix[2][2]*y1+HMatrix[2][3])/hpointZ;
     double difference = sqrt(pow(hpointX-x2,2)+pow(hpointY-y2,2));
-    if (difference < 5){
+    if (difference < 2.5){
       matchPoints.push_back(R2Point(x1,y1));
       matchPoints.push_back(R2Point(x2,y2));
     }
@@ -840,7 +871,7 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
     double hpointY = (HMatrix[2][1]*x1+HMatrix[2][2]*y1+HMatrix[2][3])/hpointZ;
     double difference = sqrt(pow(hpointX-x2,2)+pow(hpointY-y2,2));
     std::cout << "difference is " << difference << std::endl;
-    if(difference < 5){
+    if(difference < 4){
       // draw them green
       temp.push_back(currStoredFeature.at(num));
       for(int a = -5; a < 6; a++){
