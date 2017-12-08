@@ -48,6 +48,7 @@ static char options[] =
 "  -video\n";
 
 
+
 static void 
 ShowUsage(void)
 {
@@ -277,6 +278,10 @@ main(int argc, char **argv)
     else if (!strcmp(*argv, "-sharpen")) {
       argv++, argc--;
       image->Sharpen();
+    }
+    else if (!strcmp(*argv, "-sky")) {
+      argv++, argc--;
+      image->SkyReplacement();
     }
     else if (!strcmp(*argv, "-matchTranslation")) {
       CheckOption(*argv, argc, 2);

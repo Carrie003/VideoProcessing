@@ -903,6 +903,36 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
   prevStoredFeature = temp;
 }
 
+void R2Image::
+SkyReplacement()
+{
+  std::vector<double> weightBrightnessArray;
+  std::vector<double> weightDistanceToTopArray;
+  double weightBrightness;
+  double weightDistanceToTop;
+  for (int x = 0; x < width; x++){
+    for (int y = 0; y < height; y++){
+      weightBrightness = (Pixel(x,y).Red() + Pixel(x,y).Green() + Pixel(x,y).Blue()) / 3.0;
+      //std::cout<< weightBrightness << std::endl;
+      if (weightBrightness < 0.5)
+        weightBrightness = 0;
+      weightBrightnessArray.push_back(weightBrightness);
+
+      if (y < height/4){
+        weightDistanceToTop = 0;
+      } else {
+        weightDistanceToTop = (double)y/(double)height;
+      }
+      weightDistanceToTopArray.push_back(weightDistanceToTop);
+
+      double weightProduct = weightBrightness * weightDistanceToTop;
+
+      Pixel(x,y).Reset(1.0 * weightProduct, 0.1 * Pixel(x,y).Green(), 0.1 * Pixel(x,y).Blue(), 1.0);
+      Pixel(x,y).Clamp();
+    }
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////
 // I/O Functions
 ////////////////////////////////////////////////////////////////////////

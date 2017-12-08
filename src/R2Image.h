@@ -181,6 +181,7 @@ class R2Image {
   // video operations
   void FirstFrameProcessing();
   void FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature> temp);
+  void SkyReplacement();
 
   // File reading/writing
   int Read(const char *filename);
