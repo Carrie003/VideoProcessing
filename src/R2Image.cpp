@@ -1003,7 +1003,7 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyPrev, 
   std::cout<< newHMatrix[2][1] << "," << newHMatrix[2][2] << "," << newHMatrix[2][3] << std::endl;
   std::cout<< newHMatrix[3][1] << "," << newHMatrix[3][2] << "," << newHMatrix[3][3] << std::endl;
 
-  // Inverse of HMatrix
+  // Inverse of newHMatrix
 
   double W[4];
   double** V = dmatrix(1, 3, 1, 3);
@@ -1035,6 +1035,7 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyPrev, 
   inverseNewHMatrix[3][2] = V[3][1]*newHMatrix[2][1]+V[3][2]*newHMatrix[2][2]+V[3][3]*newHMatrix[2][3];
   inverseNewHMatrix[3][3] = V[3][1]*newHMatrix[3][1]+V[3][2]*newHMatrix[3][2]+V[3][3]*newHMatrix[3][3];
 
+  // multiply with original skyMatrix
   V[1][1] = inverseNewHMatrix[1][1]*skyMatrix[1][1]+inverseNewHMatrix[1][2]*skyMatrix[2][1]+inverseNewHMatrix[1][3]*skyMatrix[3][1];
   V[1][2] = inverseNewHMatrix[1][1]*skyMatrix[1][2]+inverseNewHMatrix[1][2]*skyMatrix[2][2]+inverseNewHMatrix[1][3]*skyMatrix[3][2];
   V[1][3] = inverseNewHMatrix[1][1]*skyMatrix[1][3]+inverseNewHMatrix[1][2]*skyMatrix[2][3]+inverseNewHMatrix[1][3]*skyMatrix[3][3];
@@ -1054,6 +1055,16 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyPrev, 
   skyMatrix[3][1] = V[3][1];
   skyMatrix[3][2] = V[3][2];
   skyMatrix[3][3] = V[3][3];
+
+  // skyMatrix[1][1] = newHMatrix[1][1];
+  // skyMatrix[1][2] = newHMatrix[1][2];
+  // skyMatrix[1][3] = newHMatrix[1][3];
+  // skyMatrix[2][1] = newHMatrix[2][1];
+  // skyMatrix[2][2] = newHMatrix[2][2];
+  // skyMatrix[2][3] = newHMatrix[2][3];
+  // skyMatrix[3][1] = newHMatrix[3][1];
+  // skyMatrix[3][2] = newHMatrix[3][2];
+  // skyMatrix[3][3] = newHMatrix[3][3];
 
 
   for (int x = 0; x < width; x ++) {
@@ -1085,6 +1096,36 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyPrev, 
   for (int x = 0; x < width; x ++) {
     for (int y = 0; y < height; y ++) {
       skyPrev->Pixel(x,y) = skyCurrent->Pixel(x,y);
+    }
+  }
+
+  // Sky replacement
+
+  std::vector<double> weightBrightnessArray;
+  std::vector<double> weightDistanceToTopArray;
+  double weightBrightness;
+  double weightDistanceToTop;
+  for (int x = 0; x < width; x++){
+    for (int y = 0; y < height; y++){
+      weightBrightness = (currentImage->Pixel(x,y).Red() + currentImage->Pixel(x,y).Green() + currentImage->Pixel(x,y).Blue()) / 3.0;
+      //std::cout<< weightBrightness << std::endl;
+      if (weightBrightness < 0.5)
+        weightBrightness = 0;
+      weightBrightnessArray.push_back(weightBrightness);
+
+      if (y < height/4){
+        weightDistanceToTop = 0;
+      } else {
+        weightDistanceToTop = (double)y/(double)height;
+      }
+      weightDistanceToTopArray.push_back(weightDistanceToTop);
+
+      double weightProduct = weightBrightness * weightDistanceToTop;
+
+      currentImage->Pixel(x,y) = (1-weightProduct)*currentImage->Pixel(x,y)+weightProduct*skyCurrent->Pixel(x,y);
+
+      // Pixel(x,y).Reset(1.0 * weightProduct, 0.1 * Pixel(x,y).Green(), 0.1 * Pixel(x,y).Blue(), 1.0);
+      currentImage->Pixel(x,y).Clamp();
     }
   }
 
@@ -1129,11 +1170,11 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyPrev, 
     }
   }
 
-  for (int x = 0; x < width; x ++) {
-    for (int y = 0; y < height; y ++) {
-      currentImage->Pixel(x,y) = skyCurrent->Pixel(x,y);
-    }
-  }
+  // for (int x = 0; x < width; x ++) {
+  //   for (int y = 0; y < height; y ++) {
+  //     currentImage->Pixel(x,y) = skyCurrent->Pixel(x,y);
+  //   }
+  // }
 
   prevStoredFeature = temp;
 
