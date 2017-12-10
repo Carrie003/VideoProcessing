@@ -290,6 +290,10 @@ main(int argc, char **argv)
       argv++, argc--;
       image->Sharpen();
     }
+    else if (!strcmp(*argv, "-sky")) {
+      argv++, argc--;
+      image->SkyReplacement();
+    }
     else if (!strcmp(*argv, "-matchTranslation")) {
       CheckOption(*argv, argc, 2);
       R2Image *other_image = new R2Image(argv[1]);
