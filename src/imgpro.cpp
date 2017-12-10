@@ -169,15 +169,13 @@ main(int argc, char **argv)
       fprintf(stderr, "Unable to read skyImage\n");
       exit(-1);
     }
-    R2Image skyPrev (*mainImage);
-    R2Image skyCurrent (*mainImage);
     double** skyMatrix = dmatrix(1, 3, 1, 3);
 
 		// =============== VIDEO PROCESSING ===============
 
 		// mainImage->Brighten(3.0f);
 		// here you could call mainImage->FirstFrameProcessing( );
-    mainImage -> FirstFrameProcessing(skyImage, &skyPrev, skyMatrix);
+    mainImage -> FirstFrameProcessing(skyImage, skyMatrix);
     std::vector<R2Image::Feature> prevFeatures = mainImage->prevStoredFeature;
 
 		int end = 88;
@@ -207,7 +205,7 @@ main(int argc, char **argv)
 			// currentImage->Brighten((float)i/(float)end);
 			// here you could call
 			//
-			 mainImage->FrameProcessing(prevImage, currentImage, &skyPrev, &skyCurrent, skyImage, skyMatrix, prevFeatures);
+			 mainImage->FrameProcessing(prevImage, currentImage, skyImage, skyMatrix, prevFeatures);
        prevFeatures = mainImage -> prevStoredFeature;
 			//
 			// where FrameProcessing would process the current input currentImage, as well as writing the output to currentImage

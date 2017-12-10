@@ -488,7 +488,7 @@ Harris(double sigma)
 }
 
 void R2Image::
-FirstFrameProcessing(R2Image * skyImage, R2Image * skyPrev, double** skyMatrix)
+FirstFrameProcessing(R2Image * skyImage, double** skyMatrix)
 {
   // warp sky
   R2Image skyOriginal (*skyImage);
@@ -686,14 +686,6 @@ FirstFrameProcessing(R2Image * skyImage, R2Image * skyPrev, double** skyMatrix)
     index--;
   }
 
-  for (int x = 0; x < width; x++){
-    for (int y = 0; y < height; y++){
-      if (x < skyOriginal.width && y < skyOriginal.height) {
-        skyPrev->Pixel(x,y) = skyOriginal.Pixel(x,y);
-      }
-    }
-  }
-
   std::cout << "prevStoredFeature size is " << prevStoredFeature.size() << std::endl;
 }
 
@@ -787,13 +779,12 @@ line(int x0, int x1, int y0, int y1, float r, float g, float b)
 }
 
 void R2Image::
-FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyPrev, R2Image * skyCurrent, R2Image * skyImage, double** skyMatrix, std::vector<Feature> prevFeatures)
+FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyImage, double** skyMatrix, std::vector<Feature> prevFeatures)
 {
 
   R2Image image1 (*prevImage);
   R2Image image2 (*currentImage);
-  // R2Image sky1 (*skyPrev);
-  // R2Image sky2 (*skyCurrent);
+  R2Image skyCurrent (*this);
 
   prevStoredFeature = prevFeatures;
   currStoredFeature.clear();
@@ -1069,33 +1060,10 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyPrev, 
 
   for (int x = 0; x < width; x ++) {
     for (int y = 0; y < height; y ++) {
-      // double hpointZ = inverseNewHMatrix[3][1]*x+inverseNewHMatrix[3][2]*y+inverseNewHMatrix[3][3];
-      // double hpointX = (inverseNewHMatrix[1][1]*x+inverseNewHMatrix[1][2]*y+inverseNewHMatrix[1][3])/hpointZ;
-      // double hpointY = (inverseNewHMatrix[2][1]*x+inverseNewHMatrix[2][2]*y+inverseNewHMatrix[2][3])/hpointZ;
       double hpointZ = skyMatrix[3][1]*x+skyMatrix[3][2]*y+skyMatrix[3][3];
       double hpointX = (skyMatrix[1][1]*x+skyMatrix[1][2]*y+skyMatrix[1][3])/hpointZ;
       double hpointY = (skyMatrix[2][1]*x+skyMatrix[2][2]*y+skyMatrix[2][3])/hpointZ;
-      // std::cout << "x" << x << "hpointX" << hpointX << std::endl;
-      // std::cout << "y" << y << "hpointY" << hpointY << std::endl;
-      // if (hpointX < 0) {
-      //   hpointX = 0;
-      // }
-      // else if (hpointX >= width) {
-      //   hpointX = width - 1;
-      // }
-      // if (hpointY < 0) {
-      //   hpointY = 0;
-      // }
-      // else if (hpointY >= height) {
-      //   hpointY = height - 1;
-      // }
-      skyCurrent->Pixel(x,y) = skyImage->Pixel(hpointX,hpointY);
-      //skyCurrent->Pixel(x,y) = skyImage->Pixel(x,y);
-    }
-  }
-  for (int x = 0; x < width; x ++) {
-    for (int y = 0; y < height; y ++) {
-      skyPrev->Pixel(x,y) = skyCurrent->Pixel(x,y);
+      skyCurrent.Pixel(x,y) = skyImage->Pixel(hpointX,hpointY);
     }
   }
 
@@ -1122,7 +1090,7 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyPrev, 
 
       double weightProduct = weightBrightness * weightDistanceToTop;
 
-      currentImage->Pixel(x,y) = (1-weightProduct)*currentImage->Pixel(x,y)+weightProduct*skyCurrent->Pixel(x,y);
+      currentImage->Pixel(x,y) = (1-weightProduct)*currentImage->Pixel(x,y)+weightProduct*skyCurrent.Pixel(x,y);
 
       // Pixel(x,y).Reset(1.0 * weightProduct, 0.1 * Pixel(x,y).Green(), 0.1 * Pixel(x,y).Blue(), 1.0);
       currentImage->Pixel(x,y).Clamp();
@@ -1169,12 +1137,6 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyPrev, 
       currentImage->line(x1, x2, y1, y2, 1.0, 0.0, 0.0);
     }
   }
-
-  // for (int x = 0; x < width; x ++) {
-  //   for (int y = 0; y < height; y ++) {
-  //     currentImage->Pixel(x,y) = skyCurrent->Pixel(x,y);
-  //   }
-  // }
 
   prevStoredFeature = temp;
 
