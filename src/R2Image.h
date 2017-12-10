@@ -60,7 +60,7 @@ class R2Image {
 
   // additional functionality
   void line(int x0, int x1, int y0, int y1, float r, float g, float b);
-  void square(int a0, int a1, int b0, int b1, int c0, int c1, int d0, int d1); 
+  void square(int a0, int a1, int b0, int b1, int c0, int c1, int d0, int d1);
 
   public:
   struct Feature
@@ -179,8 +179,8 @@ class R2Image {
   void ScaleInvariantHarris();
 
   // video operations
-  void FirstFrameProcessing();
-  void FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature> temp);
+  void FirstFrameProcessing(R2Image * skyImage, double** skyMatrix);
+  void FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyImage, double** skyMatrix, std::vector<Feature> temp);
   void SkyReplacement();
 
   // File reading/writing
@@ -252,7 +252,7 @@ Pixel(int x, int y)
 inline R2Pixel *R2Image::
 Pixels(void)
 {
-  // Return pointer to pixels for whole image 
+  // Return pointer to pixels for whole image
   // (pixels start at lower-left and go in row-major order)
   return pixels;
 }
@@ -270,7 +270,7 @@ Pixels(int x)
 
 
 inline R2Pixel *R2Image::
-operator[](int x) 
+operator[](int x)
 {
   // Return pixels pointer for row at x
   return Pixels(x);
