@@ -2,7 +2,7 @@
 
 
 
-// Include files 
+// Include files
 
 #include "R2/R2.h"
 #include "R2Pixel.h"
@@ -22,7 +22,7 @@ R2Image::
 R2Image(void)
   : pixels(NULL),
     npixels(0),
-    width(0), 
+    width(0),
     height(0)
 {
 }
@@ -33,7 +33,7 @@ R2Image::
 R2Image(const char *filename)
   : pixels(NULL),
     npixels(0),
-    width(0), 
+    width(0),
     height(0)
 {
   // Read image
@@ -46,7 +46,7 @@ R2Image::
 R2Image(int width, int height)
   : pixels(NULL),
     npixels(width * height),
-    width(width), 
+    width(width),
     height(height)
 {
   // Allocate pixels
@@ -60,15 +60,15 @@ R2Image::
 R2Image(int width, int height, const R2Pixel *p)
   : pixels(NULL),
     npixels(width * height),
-    width(width), 
+    width(width),
     height(height)
 {
   // Allocate pixels
   pixels = new R2Pixel [ npixels ];
   assert(pixels);
 
-  // Copy pixels 
-  for (int i = 0; i < npixels; i++) 
+  // Copy pixels
+  for (int i = 0; i < npixels; i++)
     pixels[i] = p[i];
 }
 
@@ -78,16 +78,16 @@ R2Image::
 R2Image(const R2Image& image)
   : pixels(NULL),
     npixels(image.npixels),
-    width(image.width), 
+    width(image.width),
     height(image.height)
-    
+
 {
   // Allocate pixels
   pixels = new R2Pixel [ npixels ];
   assert(pixels);
 
-  // Copy pixels 
-  for (int i = 0; i < npixels; i++) 
+  // Copy pixels
+  for (int i = 0; i < npixels; i++)
     pixels[i] = image.pixels[i];
 }
 
@@ -117,8 +117,8 @@ operator=(const R2Image& image)
   pixels = new R2Pixel [ npixels ];
   assert(pixels);
 
-  // Copy pixels 
-  for (int i = 0; i < npixels; i++) 
+  // Copy pixels
+  for (int i = 0; i < npixels; i++)
     pixels[i] = image.pixels[i];
 
   // Return image
@@ -159,7 +159,7 @@ svdTest(void)
   linEquations[3][4] = p3[0];
   linEquations[3][5] = p3[1];
   linEquations[3][6] = 1.0;
-  
+
   linEquations[4][1] = p4[0]*p4[0];
   linEquations[4][2] = p4[0]*p4[1];
   linEquations[4][3] = p4[1]*p4[1];
@@ -184,7 +184,7 @@ svdTest(void)
   // compute the SVD
   double singularValues[7]; // 1..6
   double** nullspaceMatrix = dmatrix(1,6,1,6);
-  
+
 
   // get the result
   printf("\n Singular values: %f, %f, %f, %f, %f, %f\n",singularValues[1],singularValues[2],singularValues[3],singularValues[4],singularValues[5],singularValues[6]);
@@ -197,51 +197,51 @@ svdTest(void)
   printf("Conic coefficients: %f, %f, %f, %f, %f, %f\n",nullspaceMatrix[1][smallestIndex],nullspaceMatrix[2][smallestIndex],nullspaceMatrix[3][smallestIndex],nullspaceMatrix[4][smallestIndex],nullspaceMatrix[5][smallestIndex],nullspaceMatrix[6][smallestIndex]);
 
   // make sure the solution is correct:
-  printf("Equation #1 result: %f\n",  p1[0]*p1[0]*nullspaceMatrix[1][smallestIndex] + 
-                    p1[0]*p1[1]*nullspaceMatrix[2][smallestIndex] + 
-                    p1[1]*p1[1]*nullspaceMatrix[3][smallestIndex] + 
-                    p1[0]*nullspaceMatrix[4][smallestIndex] + 
-                    p1[1]*nullspaceMatrix[5][smallestIndex] + 
+  printf("Equation #1 result: %f\n",  p1[0]*p1[0]*nullspaceMatrix[1][smallestIndex] +
+                    p1[0]*p1[1]*nullspaceMatrix[2][smallestIndex] +
+                    p1[1]*p1[1]*nullspaceMatrix[3][smallestIndex] +
+                    p1[0]*nullspaceMatrix[4][smallestIndex] +
+                    p1[1]*nullspaceMatrix[5][smallestIndex] +
                     nullspaceMatrix[6][smallestIndex]);
 
-  printf("Equation #2 result: %f\n",  p2[0]*p2[0]*nullspaceMatrix[1][smallestIndex] + 
-                    p2[0]*p2[1]*nullspaceMatrix[2][smallestIndex] + 
-                    p2[1]*p2[1]*nullspaceMatrix[3][smallestIndex] + 
-                    p2[0]*nullspaceMatrix[4][smallestIndex] + 
-                    p2[1]*nullspaceMatrix[5][smallestIndex] + 
+  printf("Equation #2 result: %f\n",  p2[0]*p2[0]*nullspaceMatrix[1][smallestIndex] +
+                    p2[0]*p2[1]*nullspaceMatrix[2][smallestIndex] +
+                    p2[1]*p2[1]*nullspaceMatrix[3][smallestIndex] +
+                    p2[0]*nullspaceMatrix[4][smallestIndex] +
+                    p2[1]*nullspaceMatrix[5][smallestIndex] +
                     nullspaceMatrix[6][smallestIndex]);
 
-  printf("Equation #3 result: %f\n",  p3[0]*p3[0]*nullspaceMatrix[1][smallestIndex] + 
-                    p3[0]*p3[1]*nullspaceMatrix[2][smallestIndex] + 
-                    p3[1]*p3[1]*nullspaceMatrix[3][smallestIndex] + 
-                    p3[0]*nullspaceMatrix[4][smallestIndex] + 
-                    p3[1]*nullspaceMatrix[5][smallestIndex] + 
+  printf("Equation #3 result: %f\n",  p3[0]*p3[0]*nullspaceMatrix[1][smallestIndex] +
+                    p3[0]*p3[1]*nullspaceMatrix[2][smallestIndex] +
+                    p3[1]*p3[1]*nullspaceMatrix[3][smallestIndex] +
+                    p3[0]*nullspaceMatrix[4][smallestIndex] +
+                    p3[1]*nullspaceMatrix[5][smallestIndex] +
                     nullspaceMatrix[6][smallestIndex]);
 
-  printf("Equation #4 result: %f\n",  p4[0]*p4[0]*nullspaceMatrix[1][smallestIndex] + 
-                    p4[0]*p4[1]*nullspaceMatrix[2][smallestIndex] + 
-                    p4[1]*p4[1]*nullspaceMatrix[3][smallestIndex] + 
-                    p4[0]*nullspaceMatrix[4][smallestIndex] + 
-                    p4[1]*nullspaceMatrix[5][smallestIndex] + 
+  printf("Equation #4 result: %f\n",  p4[0]*p4[0]*nullspaceMatrix[1][smallestIndex] +
+                    p4[0]*p4[1]*nullspaceMatrix[2][smallestIndex] +
+                    p4[1]*p4[1]*nullspaceMatrix[3][smallestIndex] +
+                    p4[0]*nullspaceMatrix[4][smallestIndex] +
+                    p4[1]*nullspaceMatrix[5][smallestIndex] +
                     nullspaceMatrix[6][smallestIndex]);
 
-  printf("Equation #5 result: %f\n",  p5[0]*p5[0]*nullspaceMatrix[1][smallestIndex] + 
-                    p5[0]*p5[1]*nullspaceMatrix[2][smallestIndex] + 
-                    p5[1]*p5[1]*nullspaceMatrix[3][smallestIndex] + 
-                    p5[0]*nullspaceMatrix[4][smallestIndex] + 
-                    p5[1]*nullspaceMatrix[5][smallestIndex] + 
+  printf("Equation #5 result: %f\n",  p5[0]*p5[0]*nullspaceMatrix[1][smallestIndex] +
+                    p5[0]*p5[1]*nullspaceMatrix[2][smallestIndex] +
+                    p5[1]*p5[1]*nullspaceMatrix[3][smallestIndex] +
+                    p5[0]*nullspaceMatrix[4][smallestIndex] +
+                    p5[1]*nullspaceMatrix[5][smallestIndex] +
                     nullspaceMatrix[6][smallestIndex]);
 
   R2Point test_point(0.34,-2.8);
 
-  printf("A point off the conic: %f\n", test_point[0]*test_point[0]*nullspaceMatrix[1][smallestIndex] + 
-                      test_point[0]*test_point[1]*nullspaceMatrix[2][smallestIndex] + 
-                      test_point[1]*test_point[1]*nullspaceMatrix[3][smallestIndex] + 
-                      test_point[0]*nullspaceMatrix[4][smallestIndex] + 
-                      test_point[1]*nullspaceMatrix[5][smallestIndex] + 
+  printf("A point off the conic: %f\n", test_point[0]*test_point[0]*nullspaceMatrix[1][smallestIndex] +
+                      test_point[0]*test_point[1]*nullspaceMatrix[2][smallestIndex] +
+                      test_point[1]*test_point[1]*nullspaceMatrix[3][smallestIndex] +
+                      test_point[0]*nullspaceMatrix[4][smallestIndex] +
+                      test_point[1]*nullspaceMatrix[5][smallestIndex] +
                       nullspaceMatrix[6][smallestIndex]);
 
-  return; 
+  return;
 }
 
 
@@ -343,7 +343,7 @@ Bilateral(double sigmaR, double sigmaD)
       }
 
       Pixel(x,y) /= total;
-      
+
 
     }
   }
@@ -438,8 +438,8 @@ Blur(double sigma)
 
       for (int a = -kernelSize; a < kernelSize + 1; a++){
         for (int b = -kernelSize; b<kernelSize + 1; b++){
-          Pixel(x,y) = Pixel(x,y) + tempImage.Pixel(x+a,y+b)*gaussianKernel[a+kernelSize]*gaussianKernel[b+kernelSize]; 
-        }  
+          Pixel(x,y) = Pixel(x,y) + tempImage.Pixel(x+a,y+b)*gaussianKernel[a+kernelSize]*gaussianKernel[b+kernelSize];
+        }
       }
 
       //Pixel(x, y).Clamp();
@@ -484,13 +484,139 @@ Harris(double sigma)
     }
   }
 
-  
+
 }
 
 void R2Image::
-FirstFrameProcessing()
+FirstFrameProcessing(R2Image * skyImage, R2Image * skyPrev, double** skyMatrix)
 {
-  // Find 150 features with high corner score, and make sure there is at least 10 pixel distance between them 
+  // warp sky
+  R2Image skyOriginal (*skyImage);
+
+  R2Point p1(0.25*skyOriginal.Width(), 0.25*skyOriginal.Height());
+  R2Point p2(0, 0);
+  R2Point p3(0.25*skyOriginal.Width()+width-1, 0.25*skyOriginal.Height());
+  R2Point p4(width-1, 0);
+  R2Point p5(0.25*skyOriginal.Width(), 0.25*skyOriginal.Height()+height-1);
+  R2Point p6(0, height-1);
+  R2Point p7(0.25*skyOriginal.Width()+width-1, 0.25*skyOriginal.Height()+height-1);
+  R2Point p8(width-1, height-1);
+
+  // R2Point p2(0.25*skyOriginal.Width(), 0.25*skyOriginal.Height());
+  // R2Point p1(0, 0);
+  // R2Point p4(0.75*skyOriginal.Width(), 0.25*skyOriginal.Height());
+  // R2Point p3(width-1, 0);
+  // R2Point p6(0.25*skyOriginal.Width(), 0.75*skyOriginal.Height());
+  // R2Point p5(0, height-1);
+  // R2Point p8(0.75*skyOriginal.Width(), 0.75*skyOriginal.Height());
+  // R2Point p7(width-1, height-1);
+  //
+  std::cout << "p1 " << p1[0] << "," << p1[1] << std::endl;
+  std::cout << "p2 " << p2[0] << "," << p2[1] << std::endl;
+  std::cout << "p3 " << p3[0] << "," << p3[1] << std::endl;
+  std::cout << "p4 " << p4[0] << "," << p4[1] << std::endl;
+  std::cout << "p5 " << p5[0] << "," << p5[1] << std::endl;
+  std::cout << "p6 " << p6[0] << "," << p6[1] << std::endl;
+  std::cout << "p7 " << p7[0] << "," << p7[1] << std::endl;
+  std::cout << "p8 " << p8[0] << "," << p8[1] << std::endl;
+
+  R2Point points[] = {p1, p2, p3, p4, p5, p6, p7, p8};
+  double** linEquations = dmatrix(1, 8, 1, 9);
+
+  for (int i = 0 ; i < 4; i++){
+    linEquations[i*2+1][1] = -points[i*2][0];
+    linEquations[i*2+1][2] = -points[i*2][1];
+    linEquations[i*2+1][3] = -1.0;
+    linEquations[i*2+1][4] = 0.0;
+    linEquations[i*2+1][5] = 0.0;
+    linEquations[i*2+1][6] = 0.0;
+    linEquations[i*2+1][7] = points[i*2][0]*points[i*2+1][0];
+    linEquations[i*2+1][8] = points[i*2][1]*points[i*2+1][0];
+    linEquations[i*2+1][9] = points[i*2+1][0];
+
+    linEquations[i*2+2][1] = 0.0;
+    linEquations[i*2+2][2] = 0.0;
+    linEquations[i*2+2][3] = 0.0;
+    linEquations[i*2+2][4] = -points[i*2][0];
+    linEquations[i*2+2][5] = -points[i*2][1];
+    linEquations[i*2+2][6] = -1.0;
+    linEquations[i*2+2][7] = points[i*2][0]*points[i*2+1][1];
+    linEquations[i*2+2][8] = points[i*2][1]*points[i*2+1][1];
+    linEquations[i*2+2][9] = points[i*2+1][1];
+  }
+
+  double singularValues[10];
+  double** nullspaceMatrix = dmatrix(1, 9, 1, 9);
+  svdcmp(linEquations, 8, 9, singularValues, nullspaceMatrix);
+
+  int smallestIndex = 1;
+  for(int i=2;i<10;i++) if(singularValues[i]<singularValues[smallestIndex]) smallestIndex=i;
+
+  double** homographyMatrix = dmatrix(1, 3, 1, 3);
+  homographyMatrix[1][1] = nullspaceMatrix[1][smallestIndex];
+  homographyMatrix[1][2] = nullspaceMatrix[2][smallestIndex];
+  homographyMatrix[1][3] = nullspaceMatrix[3][smallestIndex];
+  homographyMatrix[2][1] = nullspaceMatrix[4][smallestIndex];
+  homographyMatrix[2][2] = nullspaceMatrix[5][smallestIndex];
+  homographyMatrix[2][3] = nullspaceMatrix[6][smallestIndex];
+  homographyMatrix[3][1] = nullspaceMatrix[7][smallestIndex];
+  homographyMatrix[3][2] = nullspaceMatrix[8][smallestIndex];
+  homographyMatrix[3][3] = nullspaceMatrix[9][smallestIndex];
+
+  // skyMatrix[1][1] = homographyMatrix[1][1];
+  // skyMatrix[1][2] = homographyMatrix[1][2];
+  // skyMatrix[1][3] = homographyMatrix[1][3];
+  // skyMatrix[2][1] = homographyMatrix[2][1];
+  // skyMatrix[2][2] = homographyMatrix[2][2];
+  // skyMatrix[2][3] = homographyMatrix[2][3];
+  // skyMatrix[3][1] = homographyMatrix[3][1];
+  // skyMatrix[3][2] = homographyMatrix[3][2];
+  // skyMatrix[3][3] = homographyMatrix[3][3];
+
+  // skyMatrix[1][1] = 1;
+  // skyMatrix[1][2] = 0;
+  // skyMatrix[1][3] = skyOriginal.Width()/0.25;
+  // skyMatrix[2][1] = 0;
+  // skyMatrix[2][2] = 1;
+  // skyMatrix[2][3] = skyOriginal.Height()/0.25;
+  // skyMatrix[3][1] = 0;
+  // skyMatrix[3][2] = 0;
+  // skyMatrix[3][3] = 1;
+
+  // Inverse of homographyMatrix to get skyMatrix
+
+  double W[4];
+  double** V = dmatrix(1, 3, 1, 3);
+  svdcmp(homographyMatrix, 3, 3, W, V);
+  printf("\n Singular values: %f, %f, %f \n",W[1],W[2],W[3]);
+
+  for (int i = 1; i <= 3; i ++) {
+    W[i] = 1/W[i];
+    std::cout << "W[i] = 1/W[i];" << W[i] << std::endl;
+  }
+
+  V[1][1] = V[1][1]*W[1];
+  V[1][2] = V[1][2]*W[2];
+  V[1][3] = V[1][3]*W[3];
+  V[2][1] = V[2][1]*W[1];
+  V[2][2] = V[2][2]*W[2];
+  V[2][3] = V[2][3]*W[3];
+  V[3][1] = V[3][1]*W[1];
+  V[3][2] = V[3][2]*W[2];
+  V[3][3] = V[3][3]*W[3];
+
+  skyMatrix[1][1] = V[1][1]*homographyMatrix[1][1]+V[1][2]*homographyMatrix[1][2]+V[1][3]*homographyMatrix[1][3];
+  skyMatrix[1][2] = V[1][1]*homographyMatrix[2][1]+V[1][2]*homographyMatrix[2][2]+V[1][3]*homographyMatrix[2][3];
+  skyMatrix[1][3] = V[1][1]*homographyMatrix[3][1]+V[1][2]*homographyMatrix[3][2]+V[1][3]*homographyMatrix[3][3];
+  skyMatrix[2][1] = V[2][1]*homographyMatrix[1][1]+V[2][2]*homographyMatrix[1][2]+V[2][3]*homographyMatrix[1][3];
+  skyMatrix[2][2] = V[2][1]*homographyMatrix[2][1]+V[2][2]*homographyMatrix[2][2]+V[2][3]*homographyMatrix[2][3];
+  skyMatrix[2][3] = V[2][1]*homographyMatrix[3][1]+V[2][2]*homographyMatrix[3][2]+V[2][3]*homographyMatrix[3][3];
+  skyMatrix[3][1] = V[3][1]*homographyMatrix[1][1]+V[3][2]*homographyMatrix[1][2]+V[3][3]*homographyMatrix[1][3];
+  skyMatrix[3][2] = V[3][1]*homographyMatrix[2][1]+V[3][2]*homographyMatrix[2][2]+V[3][3]*homographyMatrix[2][3];
+  skyMatrix[3][3] = V[3][1]*homographyMatrix[3][1]+V[3][2]*homographyMatrix[3][2]+V[3][3]*homographyMatrix[3][3];
+
+
+  // Find 150 features with high corner score, and make sure there is at least 10 pixel distance between them
   std::vector<Feature> featureVec;
 
   R2Image harrisImage(*this);
@@ -515,13 +641,13 @@ FirstFrameProcessing()
   //   featureVec.pop_back();
 
   //   flag = true;
-    
+
   //   for (int b = -5; b < 6; b++){
   //     if (Pixel(curr.centerX+b, curr.centerY+b) == *redPixel){
   //       flag = false;
   //     }
   //   }
-    
+
   //   if (flag){
   //     for (int a = -5; a < 6; a++){
   //       Pixel(curr.centerX + a, curr.centerY - 5) = *redPixel;
@@ -536,7 +662,7 @@ FirstFrameProcessing()
 
   int count = 0;
   int index = featureVec.size()-1;
-  
+
   while (count < 400){
     bool validPoint = true;
     int x = featureVec[index].centerX;
@@ -560,8 +686,13 @@ FirstFrameProcessing()
     index--;
   }
 
-
-
+  for (int x = 0; x < width; x++){
+    for (int y = 0; y < height; y++){
+      if (x < skyOriginal.width && y < skyOriginal.height) {
+        skyPrev->Pixel(x,y) = skyOriginal.Pixel(x,y);
+      }
+    }
+  }
 
   std::cout << "prevStoredFeature size is " << prevStoredFeature.size() << std::endl;
 }
@@ -645,7 +776,7 @@ line(int x0, int x1, int y0, int y1, float r, float g, float b)
       else y = y -1;
       error = error - 1.0;
     }
-  } 
+  }
   if (x0 > 3 && x0 < width-3 && y0>3 && y0<height-3){
     for (int x = x0-3; x<= x0+3; x++){
       for (int y = y0 -3 ; y <= y0+3; y++){
@@ -656,11 +787,13 @@ line(int x0, int x1, int y0, int y1, float r, float g, float b)
 }
 
 void R2Image::
-FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature> prevFeatures)
+FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyPrev, R2Image * skyCurrent, R2Image * skyImage, double** skyMatrix, std::vector<Feature> prevFeatures)
 {
 
   R2Image image1 (*prevImage);
   R2Image image2 (*currentImage);
+  // R2Image sky1 (*skyPrev);
+  // R2Image sky2 (*skyCurrent);
 
   prevStoredFeature = prevFeatures;
   currStoredFeature.clear();
@@ -714,6 +847,7 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
 
   double** HMatrix = dmatrix(1,3,1,3);
   double** newHMatrix = dmatrix(1,3,1,3);
+  double** inverseNewHMatrix = dmatrix(1,3,1,3);
 
   int inlierNum = 0;
 
@@ -799,7 +933,7 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
       inlierNum = inlier;
       std::cout << "inlier is " << inlierNum << std::endl;
     }
-  }  
+  }
   std::vector<R2Point> matchPoints;
 
   for (int num = 0; num < prevStoredFeature.size(); num++){
@@ -815,48 +949,143 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
       matchPoints.push_back(R2Point(x1,y1));
       matchPoints.push_back(R2Point(x2,y2));
     }
+  }
 
-    int size = matchPoints.size();
 
-    double** linearEquations = dmatrix(1, size, 1, 9);
-    for (int i = 0 ; i < (int)(size/2); i++){
-      linearEquations[i*2+1][1] = -matchPoints.at(i*2)[0];
-      linearEquations[i*2+1][2] = -matchPoints.at(i*2)[1];
-      linearEquations[i*2+1][3] = -1.0;
-      linearEquations[i*2+1][4] = 0.0;
-      linearEquations[i*2+1][5] = 0.0;
-      linearEquations[i*2+1][6] = 0.0;
-      linearEquations[i*2+1][7] = matchPoints.at(i*2)[0]*matchPoints.at(i*2+1)[0];
-      linearEquations[i*2+1][8] = matchPoints.at(i*2)[1]*matchPoints.at(i*2+1)[0];
-      linearEquations[i*2+1][9] = matchPoints.at(i*2+1)[0];
+  std::cout << "old h matrix" << std::endl;
+  std::cout<< HMatrix[1][1] << "," << HMatrix[1][2] << "," << HMatrix[1][3] << std::endl;
+  std::cout<< HMatrix[2][1] << "," << HMatrix[2][2] << "," << HMatrix[2][3] << std::endl;
+  std::cout<< HMatrix[3][1] << "," << HMatrix[3][2] << "," << HMatrix[3][3] << std::endl;
 
-      linearEquations[i*2+2][1] = 0.0;
-      linearEquations[i*2+2][2] = 0.0;
-      linearEquations[i*2+2][3] = 0.0;
-      linearEquations[i*2+2][4] = -matchPoints.at(i*2)[0];
-      linearEquations[i*2+2][5] = -matchPoints.at(i*2)[1];
-      linearEquations[i*2+2][6] = -1.0;
-      linearEquations[i*2+2][7] = matchPoints.at(i*2)[0]*matchPoints.at(i*2+1)[1];
-      linearEquations[i*2+2][8] = matchPoints.at(i*2)[1]*matchPoints.at(i*2+1)[1];
-      linearEquations[i*2+2][9] = matchPoints.at(i*2+1)[1];
-      } 
+  int size = matchPoints.size();
 
-    double singularVs[10];
-    double** nullMatrix = dmatrix(1, 9, 1, 9);
-    svdcmp(linearEquations, size, 9, singularVs, nullMatrix);
-    
+  double** linearEquations = dmatrix(1, size, 1, 9);
+  for (int i = 0 ; i < (int)(size/2); i++){
+    linearEquations[i*2+1][1] = -matchPoints.at(i*2)[0];
+    linearEquations[i*2+1][2] = -matchPoints.at(i*2)[1];
+    linearEquations[i*2+1][3] = -1.0;
+    linearEquations[i*2+1][4] = 0.0;
+    linearEquations[i*2+1][5] = 0.0;
+    linearEquations[i*2+1][6] = 0.0;
+    linearEquations[i*2+1][7] = matchPoints.at(i*2)[0]*matchPoints.at(i*2+1)[0];
+    linearEquations[i*2+1][8] = matchPoints.at(i*2)[1]*matchPoints.at(i*2+1)[0];
+    linearEquations[i*2+1][9] = matchPoints.at(i*2+1)[0];
 
-    int smallestIndex = 1;
-    for(int i=2;i<10;i++) if(singularVs[i]<singularVs[smallestIndex]) smallestIndex=i;
-    newHMatrix[1][1] = nullMatrix[1][smallestIndex];
-    newHMatrix[1][2] = nullMatrix[2][smallestIndex];
-    newHMatrix[1][3] = nullMatrix[3][smallestIndex];
-    newHMatrix[2][1] = nullMatrix[4][smallestIndex];
-    newHMatrix[2][2] = nullMatrix[5][smallestIndex];
-    newHMatrix[2][3] = nullMatrix[6][smallestIndex];
-    newHMatrix[3][1] = nullMatrix[7][smallestIndex];
-    newHMatrix[3][2] = nullMatrix[8][smallestIndex];
-    newHMatrix[3][3] = nullMatrix[9][smallestIndex];
+    linearEquations[i*2+2][1] = 0.0;
+    linearEquations[i*2+2][2] = 0.0;
+    linearEquations[i*2+2][3] = 0.0;
+    linearEquations[i*2+2][4] = -matchPoints.at(i*2)[0];
+    linearEquations[i*2+2][5] = -matchPoints.at(i*2)[1];
+    linearEquations[i*2+2][6] = -1.0;
+    linearEquations[i*2+2][7] = matchPoints.at(i*2)[0]*matchPoints.at(i*2+1)[1];
+    linearEquations[i*2+2][8] = matchPoints.at(i*2)[1]*matchPoints.at(i*2+1)[1];
+    linearEquations[i*2+2][9] = matchPoints.at(i*2+1)[1];
+    }
+
+  double singularVs[10];
+  double** nullMatrix = dmatrix(1, 9, 1, 9);
+  svdcmp(linearEquations, size, 9, singularVs, nullMatrix);
+
+  int smallestIndex = 1;
+  for(int i=2;i<10;i++) if(singularVs[i]<singularVs[smallestIndex]) smallestIndex=i;
+  newHMatrix[1][1] = nullMatrix[1][smallestIndex];
+  newHMatrix[1][2] = nullMatrix[2][smallestIndex];
+  newHMatrix[1][3] = nullMatrix[3][smallestIndex];
+  newHMatrix[2][1] = nullMatrix[4][smallestIndex];
+  newHMatrix[2][2] = nullMatrix[5][smallestIndex];
+  newHMatrix[2][3] = nullMatrix[6][smallestIndex];
+  newHMatrix[3][1] = nullMatrix[7][smallestIndex];
+  newHMatrix[3][2] = nullMatrix[8][smallestIndex];
+  newHMatrix[3][3] = nullMatrix[9][smallestIndex];
+
+  std::cout<< "newHmatrix" << std::endl;
+  std::cout<< newHMatrix[1][1] << "," << newHMatrix[1][2] << "," << newHMatrix[1][3] << std::endl;
+  std::cout<< newHMatrix[2][1] << "," << newHMatrix[2][2] << "," << newHMatrix[2][3] << std::endl;
+  std::cout<< newHMatrix[3][1] << "," << newHMatrix[3][2] << "," << newHMatrix[3][3] << std::endl;
+
+  // Inverse of HMatrix
+
+  double W[4];
+  double** V = dmatrix(1, 3, 1, 3);
+  svdcmp(newHMatrix, 3, 3, W, V);
+  printf("\n Singular values: %f, %f, %f \n",W[1],W[2],W[3]);
+
+  for (int i = 1; i <= 3; i ++) {
+    W[i] = 1/W[i];
+    std::cout << "W[i] = 1/W[i];" << W[i] << std::endl;
+  }
+
+  V[1][1] = V[1][1]*W[1];
+  V[1][2] = V[1][2]*W[2];
+  V[1][3] = V[1][3]*W[3];
+  V[2][1] = V[2][1]*W[1];
+  V[2][2] = V[2][2]*W[2];
+  V[2][3] = V[2][3]*W[3];
+  V[3][1] = V[3][1]*W[1];
+  V[3][2] = V[3][2]*W[2];
+  V[3][3] = V[3][3]*W[3];
+
+  inverseNewHMatrix[1][1] = V[1][1]*newHMatrix[1][1]+V[1][2]*newHMatrix[1][2]+V[1][3]*newHMatrix[1][3];
+  inverseNewHMatrix[1][2] = V[1][1]*newHMatrix[2][1]+V[1][2]*newHMatrix[2][2]+V[1][3]*newHMatrix[2][3];
+  inverseNewHMatrix[1][3] = V[1][1]*newHMatrix[3][1]+V[1][2]*newHMatrix[3][2]+V[1][3]*newHMatrix[3][3];
+  inverseNewHMatrix[2][1] = V[2][1]*newHMatrix[1][1]+V[2][2]*newHMatrix[1][2]+V[2][3]*newHMatrix[1][3];
+  inverseNewHMatrix[2][2] = V[2][1]*newHMatrix[2][1]+V[2][2]*newHMatrix[2][2]+V[2][3]*newHMatrix[2][3];
+  inverseNewHMatrix[2][3] = V[2][1]*newHMatrix[3][1]+V[2][2]*newHMatrix[3][2]+V[2][3]*newHMatrix[3][3];
+  inverseNewHMatrix[3][1] = V[3][1]*newHMatrix[1][1]+V[3][2]*newHMatrix[1][2]+V[3][3]*newHMatrix[1][3];
+  inverseNewHMatrix[3][2] = V[3][1]*newHMatrix[2][1]+V[3][2]*newHMatrix[2][2]+V[3][3]*newHMatrix[2][3];
+  inverseNewHMatrix[3][3] = V[3][1]*newHMatrix[3][1]+V[3][2]*newHMatrix[3][2]+V[3][3]*newHMatrix[3][3];
+
+  V[1][1] = inverseNewHMatrix[1][1]*skyMatrix[1][1]+inverseNewHMatrix[1][2]*skyMatrix[2][1]+inverseNewHMatrix[1][3]*skyMatrix[3][1];
+  V[1][2] = inverseNewHMatrix[1][1]*skyMatrix[1][2]+inverseNewHMatrix[1][2]*skyMatrix[2][2]+inverseNewHMatrix[1][3]*skyMatrix[3][2];
+  V[1][3] = inverseNewHMatrix[1][1]*skyMatrix[1][3]+inverseNewHMatrix[1][2]*skyMatrix[2][3]+inverseNewHMatrix[1][3]*skyMatrix[3][3];
+  V[2][1] = inverseNewHMatrix[2][1]*skyMatrix[1][1]+inverseNewHMatrix[2][2]*skyMatrix[2][1]+inverseNewHMatrix[2][3]*skyMatrix[3][1];
+  V[2][2] = inverseNewHMatrix[2][1]*skyMatrix[1][2]+inverseNewHMatrix[2][2]*skyMatrix[2][2]+inverseNewHMatrix[2][3]*skyMatrix[3][2];
+  V[2][3] = inverseNewHMatrix[2][1]*skyMatrix[1][3]+inverseNewHMatrix[2][2]*skyMatrix[2][3]+inverseNewHMatrix[2][3]*skyMatrix[3][3];
+  V[3][1] = inverseNewHMatrix[3][1]*skyMatrix[1][1]+inverseNewHMatrix[3][2]*skyMatrix[2][1]+inverseNewHMatrix[3][3]*skyMatrix[3][1];
+  V[3][2] = inverseNewHMatrix[3][1]*skyMatrix[1][2]+inverseNewHMatrix[3][2]*skyMatrix[2][2]+inverseNewHMatrix[3][3]*skyMatrix[3][2];
+  V[3][3] = inverseNewHMatrix[3][1]*skyMatrix[1][3]+inverseNewHMatrix[3][2]*skyMatrix[2][3]+inverseNewHMatrix[3][3]*skyMatrix[3][3];
+
+  skyMatrix[1][1] = V[1][1];
+  skyMatrix[1][2] = V[1][2];
+  skyMatrix[1][3] = V[1][3];
+  skyMatrix[2][1] = V[2][1];
+  skyMatrix[2][2] = V[2][2];
+  skyMatrix[2][3] = V[2][3];
+  skyMatrix[3][1] = V[3][1];
+  skyMatrix[3][2] = V[3][2];
+  skyMatrix[3][3] = V[3][3];
+
+
+  for (int x = 0; x < width; x ++) {
+    for (int y = 0; y < height; y ++) {
+      // double hpointZ = inverseNewHMatrix[3][1]*x+inverseNewHMatrix[3][2]*y+inverseNewHMatrix[3][3];
+      // double hpointX = (inverseNewHMatrix[1][1]*x+inverseNewHMatrix[1][2]*y+inverseNewHMatrix[1][3])/hpointZ;
+      // double hpointY = (inverseNewHMatrix[2][1]*x+inverseNewHMatrix[2][2]*y+inverseNewHMatrix[2][3])/hpointZ;
+      double hpointZ = skyMatrix[3][1]*x+skyMatrix[3][2]*y+skyMatrix[3][3];
+      double hpointX = (skyMatrix[1][1]*x+skyMatrix[1][2]*y+skyMatrix[1][3])/hpointZ;
+      double hpointY = (skyMatrix[2][1]*x+skyMatrix[2][2]*y+skyMatrix[2][3])/hpointZ;
+      // std::cout << "x" << x << "hpointX" << hpointX << std::endl;
+      // std::cout << "y" << y << "hpointY" << hpointY << std::endl;
+      // if (hpointX < 0) {
+      //   hpointX = 0;
+      // }
+      // else if (hpointX >= width) {
+      //   hpointX = width - 1;
+      // }
+      // if (hpointY < 0) {
+      //   hpointY = 0;
+      // }
+      // else if (hpointY >= height) {
+      //   hpointY = height - 1;
+      // }
+      skyCurrent->Pixel(x,y) = skyImage->Pixel(hpointX,hpointY);
+      //skyCurrent->Pixel(x,y) = skyImage->Pixel(x,y);
+    }
+  }
+  for (int x = 0; x < width; x ++) {
+    for (int y = 0; y < height; y ++) {
+      skyPrev->Pixel(x,y) = skyCurrent->Pixel(x,y);
+    }
   }
 
   std::vector<Feature> temp;
@@ -900,7 +1129,16 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, std::vector<Feature
     }
   }
 
+  for (int x = 0; x < width; x ++) {
+    for (int y = 0; y < height; y ++) {
+      currentImage->Pixel(x,y) = skyCurrent->Pixel(x,y);
+    }
+  }
+
   prevStoredFeature = temp;
+
+  //delete V;
+  delete nullMatrix;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -920,13 +1158,13 @@ Read(const char *filename)
     fprintf(stderr, "Input file has no extension (e.g., .jpg).\n");
     return 0;
   }
-  
+
   // Read file of appropriate type
   if (!strncmp(input_extension, ".bmp", 4)) return ReadBMP(filename);
   else if (!strncmp(input_extension, ".ppm", 4)) return ReadPPM(filename);
   else if (!strncmp(input_extension, ".jpg", 4)) return ReadJPEG(filename);
   else if (!strncmp(input_extension, ".jpeg", 5)) return ReadJPEG(filename);
-  
+
   // Should never get here
   fprintf(stderr, "Unrecognized image file extension");
   return 0;
@@ -943,7 +1181,7 @@ Write(const char *filename) const
     fprintf(stderr, "Input file has no extension (e.g., .jpg).\n");
     return 0;
   }
-  
+
   // Write file of appropriate type
   if (!strncmp(input_extension, ".bmp", 4)) return WriteBMP(filename);
   else if (!strncmp(input_extension, ".ppm", 4)) return WritePPM(filename, 1);
@@ -1012,7 +1250,7 @@ typedef struct tagRGBQUAD {
 
 static unsigned short int WordReadLE(FILE *fp)
 {
-  // Read a unsigned short int from a file in little endian format 
+  // Read a unsigned short int from a file in little endian format
   unsigned short int lsb, msb;
   lsb = getc(fp);
   msb = getc(fp);
@@ -1024,7 +1262,7 @@ static unsigned short int WordReadLE(FILE *fp)
 static void WordWriteLE(unsigned short int x, FILE *fp)
 {
   // Write a unsigned short int to a file in little endian format
-  unsigned char lsb = (unsigned char) (x & 0x00FF); putc(lsb, fp); 
+  unsigned char lsb = (unsigned char) (x & 0x00FF); putc(lsb, fp);
   unsigned char msb = (unsigned char) (x >> 8); putc(msb, fp);
 }
 
@@ -1032,7 +1270,7 @@ static void WordWriteLE(unsigned short int x, FILE *fp)
 
 static unsigned int DWordReadLE(FILE *fp)
 {
-  // Read a unsigned int word from a file in little endian format 
+  // Read a unsigned int word from a file in little endian format
   unsigned int b1 = getc(fp);
   unsigned int b2 = getc(fp);
   unsigned int b3 = getc(fp);
@@ -1044,7 +1282,7 @@ static unsigned int DWordReadLE(FILE *fp)
 
 static void DWordWriteLE(unsigned int x, FILE *fp)
 {
-  // Write a unsigned int to a file in little endian format 
+  // Write a unsigned int to a file in little endian format
   unsigned char b1 = (x & 0x000000FF); putc(b1, fp);
   unsigned char b2 = ((x >> 8) & 0x000000FF); putc(b2, fp);
   unsigned char b3 = ((x >> 16) & 0x000000FF); putc(b3, fp);
@@ -1055,7 +1293,7 @@ static void DWordWriteLE(unsigned int x, FILE *fp)
 
 static int LongReadLE(FILE *fp)
 {
-  // Read a int word from a file in little endian format 
+  // Read a int word from a file in little endian format
   int b1 = getc(fp);
   int b2 = getc(fp);
   int b3 = getc(fp);
@@ -1067,7 +1305,7 @@ static int LongReadLE(FILE *fp)
 
 static void LongWriteLE(int x, FILE *fp)
 {
-  // Write a int to a file in little endian format 
+  // Write a int to a file in little endian format
   char b1 = (x & 0x000000FF); putc(b1, fp);
   char b2 = ((x >> 8) & 0x000000FF); putc(b2, fp);
   char b3 = ((x >> 16) & 0x000000FF); putc(b3, fp);
@@ -1093,14 +1331,14 @@ ReadBMP(const char *filename)
   bmfh.bfReserved1 = WordReadLE(fp);
   bmfh.bfReserved2 = WordReadLE(fp);
   bmfh.bfOffBits = DWordReadLE(fp);
-  
+
   /* Check file header */
   assert(bmfh.bfType == BMP_BF_TYPE);
   /* ignore bmfh.bfSize */
   /* ignore bmfh.bfReserved1 */
   /* ignore bmfh.bfReserved2 */
   assert(bmfh.bfOffBits == BMP_BF_OFF_BITS);
-  
+
   /* Read info header */
   BITMAPINFOHEADER bmih;
   bmih.biSize = DWordReadLE(fp);
@@ -1114,8 +1352,8 @@ ReadBMP(const char *filename)
   bmih.biYPelsPerMeter = LongReadLE(fp);
   bmih.biClrUsed = DWordReadLE(fp);
   bmih.biClrImportant = DWordReadLE(fp);
-  
-  // Check info header 
+
+  // Check info header
   assert(bmih.biSize == BMP_BI_SIZE);
   assert(bmih.biWidth > 0);
   assert(bmih.biHeight > 0);
@@ -1142,7 +1380,7 @@ ReadBMP(const char *filename)
     return 0;
   }
 
-  // Read buffer 
+  // Read buffer
   fseek(fp, (long) bmfh.bfOffBits, SEEK_SET);
   if (fread(buffer, 1, bmih.biSizeImage, fp) != bmih.biSizeImage) {
     fprintf(stderr, "Error while reading BMP file %s", filename);
@@ -1195,7 +1433,7 @@ WriteBMP(const char *filename) const
   int rowsize = 3 * width;
   if ((rowsize % 4) != 0) rowsize = (rowsize / 4 + 1) * 4;
 
-  // Write file header 
+  // Write file header
   BITMAPFILEHEADER bmfh;
   bmfh.bfType = BMP_BF_TYPE;
   bmfh.bfSize = BMP_BF_OFF_BITS + rowsize * height;
@@ -1208,7 +1446,7 @@ WriteBMP(const char *filename) const
   WordWriteLE(bmfh.bfReserved2, fp);
   DWordWriteLE(bmfh.bfOffBits, fp);
 
-  // Write info header 
+  // Write info header
   BITMAPINFOHEADER bmih;
   bmih.biSize = BMP_BI_SIZE;
   bmih.biWidth = width;
@@ -1252,12 +1490,12 @@ WriteBMP(const char *filename) const
     // Pad row
     for (int i = 0; i < pad; i++) fputc(0, fp);
   }
-  
+
   // Close file
   fclose(fp);
 
   // Return success
-  return 1;  
+  return 1;
 }
 
 
@@ -1298,7 +1536,7 @@ ReadPPM(const char *filename)
     fclose(fp);
     return 0;
   }
-  
+
   // Read max value
   double max_value;
   if (fscanf(fp, "%lf", &max_value) != 1) {
@@ -1306,7 +1544,7 @@ ReadPPM(const char *filename)
     fclose(fp);
     return 0;
   }
-  
+
   // Allocate image pixels
   pixels = new R2Pixel [ width * height ];
   if (!pixels) {
@@ -1321,7 +1559,7 @@ ReadPPM(const char *filename)
     int c = getc(fp);
     if (!isspace(c)) putc(c, fp);
 
-    // Read raw image data 
+    // Read raw image data
     // First ppm pixel is top-left, so read in opposite scan-line order
     for (int j = height-1; j >= 0; j--) {
       for (int i = 0; i < width; i++) {
@@ -1334,7 +1572,7 @@ ReadPPM(const char *filename)
     }
   }
   else {
-    // Read asci image data 
+    // Read asci image data
     // First ppm pixel is top-left, so read in opposite scan-line order
     for (int j = height-1; j >= 0; j--) {
       for (int i = 0; i < width; i++) {
@@ -1377,7 +1615,7 @@ WritePPM(const char *filename, int ascii) const
       return 0;
     }
 
-    // Print PPM image file 
+    // Print PPM image file
     // First ppm pixel is top-left, so write in opposite scan-line order
     fprintf(fp, "P3\n");
     fprintf(fp, "%d %d\n", width, height);
@@ -1405,8 +1643,8 @@ WritePPM(const char *filename, int ascii) const
       fprintf(stderr, "Unable to open image file: %s", filename);
       return 0;
     }
-    
-    // Print PPM image file 
+
+    // Print PPM image file
     // First ppm pixel is top-left, so write in opposite scan-line order
     fprintf(fp, "P6\n");
     fprintf(fp, "%d %d\n", width, height);
@@ -1420,13 +1658,13 @@ WritePPM(const char *filename, int ascii) const
         fprintf(fp, "%c%c%c", r, g, b);
       }
     }
-    
+
     // Close file
     fclose(fp);
   }
 
   // Return success
-  return 1;  
+  return 1;
 }
 
 
@@ -1438,7 +1676,7 @@ WritePPM(const char *filename, int ascii) const
 
 // #define USE_JPEG
 #ifdef USE_JPEG
-  extern "C" { 
+  extern "C" {
 #   define XMD_H // Otherwise, a conflict with INT32
 #   undef FAR // Otherwise, a conflict with windows.h
 #   include "jpeg/jpeglib.h"
@@ -1492,7 +1730,7 @@ ReadJPEG(const char *filename)
     return 0;
   }
 
-  // Read scan lines 
+  // Read scan lines
   // First jpeg pixel is top-left, so read pixels in opposite scan-line order
   while (cinfo.output_scanline < cinfo.output_height) {
     int scanline = cinfo.output_height - cinfo.output_scanline - 1;
@@ -1554,7 +1792,7 @@ ReadJPEG(const char *filename)
 }
 
 
-  
+
 
 int R2Image::
 WriteJPEG(const char *filename) const
@@ -1582,7 +1820,7 @@ WriteJPEG(const char *filename) const
   cinfo.optimize_coding = TRUE;
   jpeg_set_quality(&cinfo, 95, TRUE);
   jpeg_start_compress(&cinfo, TRUE);
-  
+
   // Allocate unsigned char buffer for reading image
   int rowsize = 3 * width;
   if ((rowsize % 4) != 0) rowsize = (rowsize / 4 + 1) * 4;
@@ -1638,9 +1876,3 @@ WriteJPEG(const char *filename) const
   return 0;
 #endif
 }
-
-
-
-
-
-
