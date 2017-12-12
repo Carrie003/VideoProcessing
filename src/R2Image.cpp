@@ -682,6 +682,7 @@ FirstFrameProcessing(R2Image * skyImage, double** skyMatrix)
       }
       count++;
       prevStoredFeature.push_back(featureVec[index]);
+      firstFrameStoredFeature.push_back(featureVec[index]);
     }
     index--;
   }
@@ -786,9 +787,10 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyImage,
   R2Image image2 (*currentImage);
   R2Image skyCurrent (*this);
 
-  prevStoredFeature = prevFeatures;
+
   currStoredFeature.clear();
   std::cout << "prevStoredFeature size is " << prevStoredFeature.size() << std::endl;
+  std::cout << "firstFrameStoredFeature size is " << firstFrameStoredFeature.size() << std::endl;
 
   R2Pixel *redPixel = new R2Pixel(1.0, 0.0, 0.0, 1.0);
   R2Pixel *greenPixel = new R2Pixel(0.0, 1.0, 0.0, 1.0);
@@ -936,7 +938,7 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyImage,
     double hpointX = (HMatrix[1][1]*x1+HMatrix[1][2]*y1+HMatrix[1][3])/hpointZ;
     double hpointY = (HMatrix[2][1]*x1+HMatrix[2][2]*y1+HMatrix[2][3])/hpointZ;
     double difference = sqrt(pow(hpointX-x2,2)+pow(hpointY-y2,2));
-    if (difference < 2.5){
+    if (difference < 4){
       matchPoints.push_back(R2Point(x1,y1));
       matchPoints.push_back(R2Point(x2,y2));
     }
@@ -996,108 +998,83 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyImage,
 
   // Inverse of newHMatrix
 
-  double W[4];
-  double** V = dmatrix(1, 3, 1, 3);
-  svdcmp(newHMatrix, 3, 3, W, V);
-  printf("\n Singular values: %f, %f, %f \n",W[1],W[2],W[3]);
+  // double W[4];
+  // double** V = dmatrix(1, 3, 1, 3);
+  // svdcmp(newHMatrix, 3, 3, W, V);
+  // printf("\n Singular values: %f, %f, %f \n",W[1],W[2],W[3]);
 
-  for (int i = 1; i <= 3; i ++) {
-    W[i] = 1/W[i];
-    std::cout << "W[i] = 1/W[i];" << W[i] << std::endl;
-  }
+  // for (int i = 1; i <= 3; i ++) {
+  //   W[i] = 1/W[i];
+  //   std::cout << "W[i] = 1/W[i];" << W[i] << std::endl;
+  // }
 
-  V[1][1] = V[1][1]*W[1];
-  V[1][2] = V[1][2]*W[2];
-  V[1][3] = V[1][3]*W[3];
-  V[2][1] = V[2][1]*W[1];
-  V[2][2] = V[2][2]*W[2];
-  V[2][3] = V[2][3]*W[3];
-  V[3][1] = V[3][1]*W[1];
-  V[3][2] = V[3][2]*W[2];
-  V[3][3] = V[3][3]*W[3];
+  // V[1][1] = V[1][1]*W[1];
+  // V[1][2] = V[1][2]*W[2];
+  // V[1][3] = V[1][3]*W[3];
+  // V[2][1] = V[2][1]*W[1];
+  // V[2][2] = V[2][2]*W[2];
+  // V[2][3] = V[2][3]*W[3];
+  // V[3][1] = V[3][1]*W[1];
+  // V[3][2] = V[3][2]*W[2];
+  // V[3][3] = V[3][3]*W[3];
 
-  inverseNewHMatrix[1][1] = V[1][1]*newHMatrix[1][1]+V[1][2]*newHMatrix[1][2]+V[1][3]*newHMatrix[1][3];
-  inverseNewHMatrix[1][2] = V[1][1]*newHMatrix[2][1]+V[1][2]*newHMatrix[2][2]+V[1][3]*newHMatrix[2][3];
-  inverseNewHMatrix[1][3] = V[1][1]*newHMatrix[3][1]+V[1][2]*newHMatrix[3][2]+V[1][3]*newHMatrix[3][3];
-  inverseNewHMatrix[2][1] = V[2][1]*newHMatrix[1][1]+V[2][2]*newHMatrix[1][2]+V[2][3]*newHMatrix[1][3];
-  inverseNewHMatrix[2][2] = V[2][1]*newHMatrix[2][1]+V[2][2]*newHMatrix[2][2]+V[2][3]*newHMatrix[2][3];
-  inverseNewHMatrix[2][3] = V[2][1]*newHMatrix[3][1]+V[2][2]*newHMatrix[3][2]+V[2][3]*newHMatrix[3][3];
-  inverseNewHMatrix[3][1] = V[3][1]*newHMatrix[1][1]+V[3][2]*newHMatrix[1][2]+V[3][3]*newHMatrix[1][3];
-  inverseNewHMatrix[3][2] = V[3][1]*newHMatrix[2][1]+V[3][2]*newHMatrix[2][2]+V[3][3]*newHMatrix[2][3];
-  inverseNewHMatrix[3][3] = V[3][1]*newHMatrix[3][1]+V[3][2]*newHMatrix[3][2]+V[3][3]*newHMatrix[3][3];
+  // inverseNewHMatrix[1][1] = V[1][1]*newHMatrix[1][1]+V[1][2]*newHMatrix[1][2]+V[1][3]*newHMatrix[1][3];
+  // inverseNewHMatrix[1][2] = V[1][1]*newHMatrix[2][1]+V[1][2]*newHMatrix[2][2]+V[1][3]*newHMatrix[2][3];
+  // inverseNewHMatrix[1][3] = V[1][1]*newHMatrix[3][1]+V[1][2]*newHMatrix[3][2]+V[1][3]*newHMatrix[3][3];
+  // inverseNewHMatrix[2][1] = V[2][1]*newHMatrix[1][1]+V[2][2]*newHMatrix[1][2]+V[2][3]*newHMatrix[1][3];
+  // inverseNewHMatrix[2][2] = V[2][1]*newHMatrix[2][1]+V[2][2]*newHMatrix[2][2]+V[2][3]*newHMatrix[2][3];
+  // inverseNewHMatrix[2][3] = V[2][1]*newHMatrix[3][1]+V[2][2]*newHMatrix[3][2]+V[2][3]*newHMatrix[3][3];
+  // inverseNewHMatrix[3][1] = V[3][1]*newHMatrix[1][1]+V[3][2]*newHMatrix[1][2]+V[3][3]*newHMatrix[1][3];
+  // inverseNewHMatrix[3][2] = V[3][1]*newHMatrix[2][1]+V[3][2]*newHMatrix[2][2]+V[3][3]*newHMatrix[2][3];
+  // inverseNewHMatrix[3][3] = V[3][1]*newHMatrix[3][1]+V[3][2]*newHMatrix[3][2]+V[3][3]*newHMatrix[3][3];
 
-  // multiply with original skyMatrix
-  V[1][1] = inverseNewHMatrix[1][1]*skyMatrix[1][1]+inverseNewHMatrix[1][2]*skyMatrix[2][1]+inverseNewHMatrix[1][3]*skyMatrix[3][1];
-  V[1][2] = inverseNewHMatrix[1][1]*skyMatrix[1][2]+inverseNewHMatrix[1][2]*skyMatrix[2][2]+inverseNewHMatrix[1][3]*skyMatrix[3][2];
-  V[1][3] = inverseNewHMatrix[1][1]*skyMatrix[1][3]+inverseNewHMatrix[1][2]*skyMatrix[2][3]+inverseNewHMatrix[1][3]*skyMatrix[3][3];
-  V[2][1] = inverseNewHMatrix[2][1]*skyMatrix[1][1]+inverseNewHMatrix[2][2]*skyMatrix[2][1]+inverseNewHMatrix[2][3]*skyMatrix[3][1];
-  V[2][2] = inverseNewHMatrix[2][1]*skyMatrix[1][2]+inverseNewHMatrix[2][2]*skyMatrix[2][2]+inverseNewHMatrix[2][3]*skyMatrix[3][2];
-  V[2][3] = inverseNewHMatrix[2][1]*skyMatrix[1][3]+inverseNewHMatrix[2][2]*skyMatrix[2][3]+inverseNewHMatrix[2][3]*skyMatrix[3][3];
-  V[3][1] = inverseNewHMatrix[3][1]*skyMatrix[1][1]+inverseNewHMatrix[3][2]*skyMatrix[2][1]+inverseNewHMatrix[3][3]*skyMatrix[3][1];
-  V[3][2] = inverseNewHMatrix[3][1]*skyMatrix[1][2]+inverseNewHMatrix[3][2]*skyMatrix[2][2]+inverseNewHMatrix[3][3]*skyMatrix[3][2];
-  V[3][3] = inverseNewHMatrix[3][1]*skyMatrix[1][3]+inverseNewHMatrix[3][2]*skyMatrix[2][3]+inverseNewHMatrix[3][3]*skyMatrix[3][3];
+  // // multiply with original skyMatrix
+  // V[1][1] = inverseNewHMatrix[1][1]*skyMatrix[1][1]+inverseNewHMatrix[1][2]*skyMatrix[2][1]+inverseNewHMatrix[1][3]*skyMatrix[3][1];
+  // V[1][2] = inverseNewHMatrix[1][1]*skyMatrix[1][2]+inverseNewHMatrix[1][2]*skyMatrix[2][2]+inverseNewHMatrix[1][3]*skyMatrix[3][2];
+  // V[1][3] = inverseNewHMatrix[1][1]*skyMatrix[1][3]+inverseNewHMatrix[1][2]*skyMatrix[2][3]+inverseNewHMatrix[1][3]*skyMatrix[3][3];
+  // V[2][1] = inverseNewHMatrix[2][1]*skyMatrix[1][1]+inverseNewHMatrix[2][2]*skyMatrix[2][1]+inverseNewHMatrix[2][3]*skyMatrix[3][1];
+  // V[2][2] = inverseNewHMatrix[2][1]*skyMatrix[1][2]+inverseNewHMatrix[2][2]*skyMatrix[2][2]+inverseNewHMatrix[2][3]*skyMatrix[3][2];
+  // V[2][3] = inverseNewHMatrix[2][1]*skyMatrix[1][3]+inverseNewHMatrix[2][2]*skyMatrix[2][3]+inverseNewHMatrix[2][3]*skyMatrix[3][3];
+  // V[3][1] = inverseNewHMatrix[3][1]*skyMatrix[1][1]+inverseNewHMatrix[3][2]*skyMatrix[2][1]+inverseNewHMatrix[3][3]*skyMatrix[3][1];
+  // V[3][2] = inverseNewHMatrix[3][1]*skyMatrix[1][2]+inverseNewHMatrix[3][2]*skyMatrix[2][2]+inverseNewHMatrix[3][3]*skyMatrix[3][2];
+  // V[3][3] = inverseNewHMatrix[3][1]*skyMatrix[1][3]+inverseNewHMatrix[3][2]*skyMatrix[2][3]+inverseNewHMatrix[3][3]*skyMatrix[3][3];
 
-  skyMatrix[1][1] = V[1][1];
-  skyMatrix[1][2] = V[1][2];
-  skyMatrix[1][3] = V[1][3];
-  skyMatrix[2][1] = V[2][1];
-  skyMatrix[2][2] = V[2][2];
-  skyMatrix[2][3] = V[2][3];
-  skyMatrix[3][1] = V[3][1];
-  skyMatrix[3][2] = V[3][2];
-  skyMatrix[3][3] = V[3][3];
+  // skyMatrix[1][1] = V[1][1];
+  // skyMatrix[1][2] = V[1][2];
+  // skyMatrix[1][3] = V[1][3];
+  // skyMatrix[2][1] = V[2][1];
+  // skyMatrix[2][2] = V[2][2];
+  // skyMatrix[2][3] = V[2][3];
+  // skyMatrix[3][1] = V[3][1];
+  // skyMatrix[3][2] = V[3][2];
+  // skyMatrix[3][3] = V[3][3];
 
-  // skyMatrix[1][1] = newHMatrix[1][1];
-  // skyMatrix[1][2] = newHMatrix[1][2];
-  // skyMatrix[1][3] = newHMatrix[1][3];
-  // skyMatrix[2][1] = newHMatrix[2][1];
-  // skyMatrix[2][2] = newHMatrix[2][2];
-  // skyMatrix[2][3] = newHMatrix[2][3];
-  // skyMatrix[3][1] = newHMatrix[3][1];
-  // skyMatrix[3][2] = newHMatrix[3][2];
-  // skyMatrix[3][3] = newHMatrix[3][3];
+  // // skyMatrix[1][1] = newHMatrix[1][1];
+  // // skyMatrix[1][2] = newHMatrix[1][2];
+  // // skyMatrix[1][3] = newHMatrix[1][3];
+  // // skyMatrix[2][1] = newHMatrix[2][1];
+  // // skyMatrix[2][2] = newHMatrix[2][2];
+  // // skyMatrix[2][3] = newHMatrix[2][3];
+  // // skyMatrix[3][1] = newHMatrix[3][1];
+  // // skyMatrix[3][2] = newHMatrix[3][2];
+  // // skyMatrix[3][3] = newHMatrix[3][3];
 
 
-  for (int x = 0; x < width; x ++) {
-    for (int y = 0; y < height; y ++) {
-      double hpointZ = skyMatrix[3][1]*x+skyMatrix[3][2]*y+skyMatrix[3][3];
-      double hpointX = (skyMatrix[1][1]*x+skyMatrix[1][2]*y+skyMatrix[1][3])/hpointZ;
-      double hpointY = (skyMatrix[2][1]*x+skyMatrix[2][2]*y+skyMatrix[2][3])/hpointZ;
-      skyCurrent.Pixel(x,y) = skyImage->Pixel(hpointX,hpointY);
-    }
-  }
+  // for (int x = 0; x < width; x ++) {
+  //   for (int y = 0; y < height; y ++) {
+  //     double hpointZ = skyMatrix[3][1]*x+skyMatrix[3][2]*y+skyMatrix[3][3];
+  //     double hpointX = (skyMatrix[1][1]*x+skyMatrix[1][2]*y+skyMatrix[1][3])/hpointZ;
+  //     double hpointY = (skyMatrix[2][1]*x+skyMatrix[2][2]*y+skyMatrix[2][3])/hpointZ;
+  //     skyCurrent.Pixel(x,y) = skyImage->Pixel(hpointX,hpointY);
+  //   }
+  // }
 
-  // Sky replacement
 
-  std::vector<double> weightBrightnessArray;
-  std::vector<double> weightDistanceToTopArray;
-  double weightBrightness;
-  double weightDistanceToTop;
-  for (int x = 0; x < width; x++){
-    for (int y = 0; y < height; y++){
-      weightBrightness = (currentImage->Pixel(x,y).Red() + currentImage->Pixel(x,y).Green() + currentImage->Pixel(x,y).Blue()) / 3.0;
-      //std::cout<< weightBrightness << std::endl;
-      if (weightBrightness < 0.5)
-        weightBrightness = 0;
-      weightBrightnessArray.push_back(weightBrightness);
 
-      if (y < height/4){
-        weightDistanceToTop = 0;
-      } else {
-        weightDistanceToTop = (double)y/(double)height;
-      }
-      weightDistanceToTopArray.push_back(weightDistanceToTop);
 
-      double weightProduct = weightBrightness * weightDistanceToTop;
-
-      currentImage->Pixel(x,y) = (1-weightProduct)*currentImage->Pixel(x,y)+weightProduct*skyCurrent.Pixel(x,y);
-
-      // Pixel(x,y).Reset(1.0 * weightProduct, 0.1 * Pixel(x,y).Green(), 0.1 * Pixel(x,y).Blue(), 1.0);
-      currentImage->Pixel(x,y).Clamp();
-    }
-  }
 
   std::vector<Feature> temp;
+  std::vector<Feature> tempFirstFrameFeature;
   //draw the feature pairs
   for (int num = 0; num < currStoredFeature.size(); num++){
     int x1 = prevStoredFeature.at(num).centerX;
@@ -1108,9 +1085,10 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyImage,
     double hpointX = (HMatrix[1][1]*x1+HMatrix[1][2]*y1+HMatrix[1][3])/hpointZ;
     double hpointY = (HMatrix[2][1]*x1+HMatrix[2][2]*y1+HMatrix[2][3])/hpointZ;
     double difference = sqrt(pow(hpointX-x2,2)+pow(hpointY-y2,2));
-    std::cout << "difference is " << difference << std::endl;
+    //std::cout << "difference is " << difference << std::endl;
     if(difference < 4){
       // draw them green
+      tempFirstFrameFeature.push_back(firstFrameStoredFeature.at(num));
       temp.push_back(currStoredFeature.at(num));
       for(int a = -5; a < 6; a++){
         currentImage->Pixel(x1 + a, y1 - 5) = *greenPixel;
@@ -1137,8 +1115,138 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyImage,
       currentImage->line(x1, x2, y1, y2, 1.0, 0.0, 0.0);
     }
   }
+  firstFrameStoredFeature = tempFirstFrameFeature;
+///////////////////////////////////////////////sky replacement: find matching features from first frame
+
 
   prevStoredFeature = temp;
+
+  double** HMatrix2 = dmatrix(1,3,1,3);
+  int inlierNum2 = 0;
+    for (int trial = 0; trial < 10000; trial++){
+    std::vector<Feature> random1;
+    std::vector<Feature> random2;
+    for (int i = 0; i < 4; i++){
+      int randomIndex = int(rand()%temp.size());
+      random1.push_back(temp.at(randomIndex));
+      random2.push_back(firstFrameStoredFeature.at(randomIndex));
+    }
+
+    R2Point p1(random1.at(0).centerX, random1.at(0).centerY);
+    R2Point p2(random2.at(0).centerX, random2.at(0).centerY);
+    R2Point p3(random1.at(1).centerX, random1.at(1).centerY);
+    R2Point p4(random2.at(1).centerX, random2.at(1).centerY);
+    R2Point p5(random1.at(2).centerX, random1.at(2).centerY);
+    R2Point p6(random2.at(2).centerX, random2.at(2).centerY);
+    R2Point p7(random1.at(3).centerX, random1.at(3).centerY);
+    R2Point p8(random2.at(3).centerX, random2.at(3).centerY);
+
+    R2Point points[] = {p1, p2, p3, p4, p5, p6, p7, p8};
+    double** linEquations = dmatrix(1, 8, 1, 9);
+
+    for (int i = 0 ; i < 4; i++){
+      linEquations[i*2+1][1] = -points[i*2][0];
+      linEquations[i*2+1][2] = -points[i*2][1];
+      linEquations[i*2+1][3] = -1.0;
+      linEquations[i*2+1][4] = 0.0;
+      linEquations[i*2+1][5] = 0.0;
+      linEquations[i*2+1][6] = 0.0;
+      linEquations[i*2+1][7] = points[i*2][0]*points[i*2+1][0];
+      linEquations[i*2+1][8] = points[i*2][1]*points[i*2+1][0];
+      linEquations[i*2+1][9] = points[i*2+1][0];
+
+      linEquations[i*2+2][1] = 0.0;
+      linEquations[i*2+2][2] = 0.0;
+      linEquations[i*2+2][3] = 0.0;
+      linEquations[i*2+2][4] = -points[i*2][0];
+      linEquations[i*2+2][5] = -points[i*2][1];
+      linEquations[i*2+2][6] = -1.0;
+      linEquations[i*2+2][7] = points[i*2][0]*points[i*2+1][1];
+      linEquations[i*2+2][8] = points[i*2][1]*points[i*2+1][1];
+      linEquations[i*2+2][9] = points[i*2+1][1];
+    }
+
+    double singularValues[10];
+    double** nullspaceMatrix = dmatrix(1, 9, 1, 9);
+    svdcmp(linEquations, 8, 9, singularValues, nullspaceMatrix);
+
+    int smallestIndex = 1;
+    for(int i=2;i<10;i++) if(singularValues[i]<singularValues[smallestIndex]) smallestIndex=i;
+
+    double** homographyMatrix = dmatrix(1, 3, 1, 3);
+    homographyMatrix[1][1] = nullspaceMatrix[1][smallestIndex];
+    homographyMatrix[1][2] = nullspaceMatrix[2][smallestIndex];
+    homographyMatrix[1][3] = nullspaceMatrix[3][smallestIndex];
+    homographyMatrix[2][1] = nullspaceMatrix[4][smallestIndex];
+    homographyMatrix[2][2] = nullspaceMatrix[5][smallestIndex];
+    homographyMatrix[2][3] = nullspaceMatrix[6][smallestIndex];
+    homographyMatrix[3][1] = nullspaceMatrix[7][smallestIndex];
+    homographyMatrix[3][2] = nullspaceMatrix[8][smallestIndex];
+    homographyMatrix[3][3] = nullspaceMatrix[9][smallestIndex];
+
+    // find the number of inliers
+    int inlier = 0;
+    for (int num = 0; num < temp.size(); num++){
+      int x1 = temp.at(num).centerX;
+      int y1 = temp.at(num).centerY;
+      int x2 = firstFrameStoredFeature.at(num).centerX;
+      int y2 = firstFrameStoredFeature.at(num).centerY;
+      double hpointZ = homographyMatrix[3][1]*x1+homographyMatrix[3][2]*y1+homographyMatrix[3][3];
+      double hpointX = (homographyMatrix[1][1]*x1+homographyMatrix[1][2]*y1+homographyMatrix[1][3])/hpointZ;
+      double hpointY = (homographyMatrix[2][1]*x1+homographyMatrix[2][2]*y1+homographyMatrix[2][3])/hpointZ;
+
+      if(sqrt(pow(hpointX-x2,2)+pow(hpointY-y2,2)) < 5){
+        inlier ++;
+      }
+    }
+
+    if (trial == 0 || inlier > inlierNum2){
+      HMatrix2 = homographyMatrix;
+      inlierNum2 = inlier;
+      std::cout << "inlier is " << inlierNum << std::endl;
+    }
+  }
+
+  for (int x = 0; x < width; x ++) {
+    for (int y = 0; y < height; y ++) {
+      double hpointZ = HMatrix2[3][1]*x+HMatrix2[3][2]*y+HMatrix2[3][3];
+      double hpointX = (HMatrix2[1][1]*x+HMatrix2[1][2]*y+HMatrix2[1][3])/hpointZ;
+      double hpointY = (HMatrix2[2][1]*x+HMatrix2[2][2]*y+HMatrix2[2][3])/hpointZ;
+      if (hpointX > 0 && hpointX < skyImage->width && hpointY > 0 && hpointY < skyImage->height)
+      skyCurrent.Pixel(x,y) = skyImage->Pixel(hpointX,hpointY);
+    }
+  }
+
+
+    // Sky replacement
+  std::vector<double> weightBrightnessArray;
+  std::vector<double> weightDistanceToTopArray;
+  double weightBrightness;
+  double weightDistanceToTop;
+  for (int x = 0; x < width; x++){
+    for (int y = 0; y < height; y++){
+      weightBrightness = (currentImage->Pixel(x,y).Red() + currentImage->Pixel(x,y).Green() + currentImage->Pixel(x,y).Blue()) / 3.0;
+      if (weightBrightness < 0.5)
+        weightBrightness = 0;
+      weightBrightnessArray.push_back(weightBrightness);
+
+      if (y < height/4){
+        weightDistanceToTop = 0;
+      } else {
+        weightDistanceToTop = (double)y/(double)height;
+      }
+      weightDistanceToTopArray.push_back(weightDistanceToTop);
+
+      double weightProduct = weightBrightness * weightDistanceToTop;
+
+      currentImage->Pixel(x,y) = (1-weightProduct)*currentImage->Pixel(x,y)+weightProduct*skyCurrent.Pixel(x,y);
+      currentImage->Pixel(x,y).Clamp();
+    }
+  }
+
+
+
+  
 
   //delete V;
   delete nullMatrix;
@@ -1154,7 +1262,6 @@ SkyReplacement()
   for (int x = 0; x < width; x++){
     for (int y = 0; y < height; y++){
       weightBrightness = (Pixel(x,y).Red() + Pixel(x,y).Green() + Pixel(x,y).Blue()) / 3.0;
-      //std::cout<< weightBrightness << std::endl;
       if (weightBrightness < 0.5)
         weightBrightness = 0;
       weightBrightnessArray.push_back(weightBrightness);

@@ -207,7 +207,7 @@ class R2Image {
   public:
     std::vector<Feature> prevStoredFeature;
     std::vector<Feature> currStoredFeature;
-
+    std::vector<Feature> firstFrameStoredFeature;
 };
 
 // Inline functions
