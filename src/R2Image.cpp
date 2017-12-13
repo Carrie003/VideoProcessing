@@ -493,13 +493,13 @@ FirstFrameProcessing(R2Image * skyImage, double** skyMatrix)
   // warp sky
   R2Image skyOriginal (*skyImage);
 
-  R2Point p1(0.25*skyOriginal.Width(), 0.25*skyOriginal.Height());
+  R2Point p1(0.5*skyOriginal.Width(), 0.4*skyOriginal.Height());
   R2Point p2(0, 0);
-  R2Point p3(0.25*skyOriginal.Width()+width-1, 0.25*skyOriginal.Height());
+  R2Point p3(0.5*skyOriginal.Width()+width-1, 0.4*skyOriginal.Height());
   R2Point p4(width-1, 0);
-  R2Point p5(0.25*skyOriginal.Width(), 0.25*skyOriginal.Height()+height-1);
+  R2Point p5(0.5*skyOriginal.Width(), 0.4*skyOriginal.Height()+height-1);
   R2Point p6(0, height-1);
-  R2Point p7(0.25*skyOriginal.Width()+width-1, 0.25*skyOriginal.Height()+height-1);
+  R2Point p7(0.5*skyOriginal.Width()+width-1, 0.4*skyOriginal.Height()+height-1);
   R2Point p8(width-1, height-1);
 
   // R2Point p2(0.25*skyOriginal.Width(), 0.25*skyOriginal.Height());
@@ -1207,15 +1207,105 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyImage,
     }
   }
 
+  // // recompute with more points
+  std::vector<R2Point> matchPoints2;
+  double** newHMatrix2 = dmatrix(1,3,1,3);
+
+  std::cout << "prevStoredFeature.size(): " << prevStoredFeature.size() << std::endl;
+
+  for (int num = 0; num < firstFrameStoredFeature.size(); num++){
+    int x1 = temp.at(num).centerX;
+    int y1 = temp.at(num).centerY;
+    int x2 = firstFrameStoredFeature.at(num).centerX;
+    int y2 = firstFrameStoredFeature.at(num).centerY;
+    double hpointZ = HMatrix2[3][1]*x1 + HMatrix2[3][2]*y1 + HMatrix2[3][3];
+    double hpointX = (HMatrix2[1][1]*x1+HMatrix2[1][2]*y1+HMatrix2[1][3])/hpointZ;
+    double hpointY = (HMatrix2[2][1]*x1+HMatrix2[2][2]*y1+HMatrix2[2][3])/hpointZ;
+    double difference = sqrt(pow(hpointX-x2,2)+pow(hpointY-y2,2));
+    if (difference < 4){// && y1 > height/2){
+      matchPoints2.push_back(R2Point(x1,y1));
+      matchPoints2.push_back(R2Point(x2,y2));
+      std::cout << "x1: " << x1 << ", y1: " << y1 << std::endl;
+      std::cout << "x2: " << x2 << ", y2: " << y2 << std::endl;
+    }
+  }
+
+
+  // std::cout << "old h matrix" << std::endl;
+  // std::cout<< HMatrix[1][1] << "," << HMatrix[1][2] << "," << HMatrix[1][3] << std::endl;
+  // std::cout<< HMatrix[2][1] << "," << HMatrix[2][2] << "," << HMatrix[2][3] << std::endl;
+  // std::cout<< HMatrix[3][1] << "," << HMatrix[3][2] << "," << HMatrix[3][3] << std::endl;
+
+  int size2 = matchPoints2.size();
+  std::cout << "Size2: " << size2 << std::endl;
+
+  double** linearEquations2 = dmatrix(1, size2, 1, 9);
+  for (int i = 0 ; i < (int)(size2/2); i++){
+    std::cout << "x1: " << matchPoints2.at(i*2)[0] << ", y1: " << matchPoints2.at(i*2)[1] << std::endl;
+    std::cout << "x2: " << matchPoints2.at(i*2+1)[0] << ", y2: " << matchPoints2.at(i*2+1)[1] << std::endl;
+    linearEquations2[i*2+1][1] = -matchPoints2.at(i*2)[0];
+    linearEquations2[i*2+1][2] = -matchPoints2.at(i*2)[1];
+    linearEquations2[i*2+1][3] = -1.0;
+    linearEquations2[i*2+1][4] = 0.0;
+    linearEquations2[i*2+1][5] = 0.0;
+    linearEquations2[i*2+1][6] = 0.0;
+    linearEquations2[i*2+1][7] = matchPoints2.at(i*2)[0]*matchPoints2.at(i*2+1)[0];
+    linearEquations2[i*2+1][8] = matchPoints2.at(i*2)[1]*matchPoints2.at(i*2+1)[0];
+    linearEquations2[i*2+1][9] = matchPoints2.at(i*2+1)[0];
+
+    linearEquations2[i*2+2][1] = 0.0;
+    linearEquations2[i*2+2][2] = 0.0;
+    linearEquations2[i*2+2][3] = 0.0;
+    linearEquations2[i*2+2][4] = -matchPoints2.at(i*2)[0];
+    linearEquations2[i*2+2][5] = -matchPoints2.at(i*2)[1];
+    linearEquations2[i*2+2][6] = -1.0;
+    linearEquations2[i*2+2][7] = matchPoints2.at(i*2)[0]*matchPoints2.at(i*2+1)[1];
+    linearEquations2[i*2+2][8] = matchPoints2.at(i*2)[1]*matchPoints2.at(i*2+1)[1];
+    linearEquations2[i*2+2][9] = matchPoints2.at(i*2+1)[1];
+    }
+
+  double singularVs2[10];
+  double** nullMatrix2 = dmatrix(1, 9, 1, 9);
+  svdcmp(linearEquations2, size2, 9, singularVs2, nullMatrix2);
+
+  int smallestIndex2 = 1;
+  for(int i=2;i<10;i++) if(singularVs2[i]<singularVs2[smallestIndex2]) smallestIndex2=i;
+  newHMatrix2[1][1] = nullMatrix2[1][smallestIndex2];
+  newHMatrix2[1][2] = nullMatrix2[2][smallestIndex2];
+  newHMatrix2[1][3] = nullMatrix2[3][smallestIndex2];
+  newHMatrix2[2][1] = nullMatrix2[4][smallestIndex2];
+  newHMatrix2[2][2] = nullMatrix2[5][smallestIndex2];
+  newHMatrix2[2][3] = nullMatrix2[6][smallestIndex2];
+  newHMatrix2[3][1] = nullMatrix2[7][smallestIndex2];
+  newHMatrix2[3][2] = nullMatrix2[8][smallestIndex2];
+  newHMatrix2[3][3] = nullMatrix2[9][smallestIndex2];
+
+
+  std::cout<< "newHmatrix" << std::endl;
+    std::cout<< newHMatrix2[1][1] << "," << newHMatrix2[1][2] << "," << newHMatrix2[1][3] << std::endl;
+    std::cout<< newHMatrix2[2][1] << "," << newHMatrix2[2][2] << "," << newHMatrix2[2][3] << std::endl;
+    std::cout<< newHMatrix2[3][1] << "," << newHMatrix2[3][2] << "," << newHMatrix2[3][3] << std::endl;
+  ////////////
+
   for (int x = 0; x < width; x ++) {
     for (int y = 0; y < height; y ++) {
-      double hpointZ = HMatrix2[3][1]*x+HMatrix2[3][2]*y+HMatrix2[3][3];
-      double hpointX = (HMatrix2[1][1]*x+HMatrix2[1][2]*y+HMatrix2[1][3])/hpointZ;
-      double hpointY = (HMatrix2[2][1]*x+HMatrix2[2][2]*y+HMatrix2[2][3])/hpointZ;
+      double hpointZ = newHMatrix2[3][1]*x+newHMatrix2[3][2]*y+newHMatrix2[3][3];
+      double hpointX = (newHMatrix2[1][1]*x+newHMatrix2[1][2]*y+newHMatrix2[1][3])/hpointZ;
+      double hpointY = (newHMatrix2[2][1]*x+newHMatrix2[2][2]*y+newHMatrix2[2][3])/hpointZ;
       if (hpointX > 0 && hpointX < skyImage->width && hpointY > 0 && hpointY < skyImage->height)
       skyCurrent.Pixel(x,y) = skyImage->Pixel(hpointX,hpointY);
     }
   }
+
+    // for (int x = 0; x < width; x ++) {
+    //   for (int y = 0; y < height; y ++) {
+    //     double hpointZ = HMatrix2[3][1]*x+HMatrix2[3][2]*y+HMatrix2[3][3];
+    //     double hpointX = (HMatrix2[1][1]*x+HMatrix2[1][2]*y+HMatrix2[1][3])/hpointZ;
+    //     double hpointY = (HMatrix2[2][1]*x+HMatrix2[2][2]*y+HMatrix2[2][3])/hpointZ;
+    //     if (hpointX > 0 && hpointX < skyImage->width && hpointY > 0 && hpointY < skyImage->height)
+    //     skyCurrent.Pixel(x,y) = skyImage->Pixel(hpointX,hpointY);
+    //   }
+    // }
 
 
     // Sky replacement
@@ -1225,28 +1315,35 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyImage,
   double weightDistanceToTop;
   for (int x = 0; x < width; x++){
     for (int y = 0; y < height; y++){
-      weightBrightness = (currentImage->Pixel(x,y).Red() + currentImage->Pixel(x,y).Green() + currentImage->Pixel(x,y).Blue()) / 3.0;
+      weightBrightness = (0.5+0.5*currentImage->Pixel(x,y).Green()-0.5*currentImage->Pixel(x,y).Red()-0.5*currentImage->Pixel(x,y).Blue());
       if (weightBrightness < 0.5)
         weightBrightness = 0;
+      else
+        weightBrightness = 1;
+      // weightBrightness = (currentImage->Pixel(x,y).Red() + currentImage->Pixel(x,y).Green() + currentImage->Pixel(x,y).Blue()) / 3.0;
+      // if (weightBrightness < 0.5)
+      //   weightBrightness = 0;
       weightBrightnessArray.push_back(weightBrightness);
 
-      if (y < height/4){
-        weightDistanceToTop = 0;
-      } else {
-        weightDistanceToTop = (double)y/(double)height;
-      }
-      weightDistanceToTopArray.push_back(weightDistanceToTop);
-
-      double weightProduct = weightBrightness * weightDistanceToTop;
+      // if (y < height/4){
+      //   weightDistanceToTop = 0;
+      // } else {
+      //   weightDistanceToTop = (double)y/(double)height;
+      // }
+      // weightDistanceToTopArray.push_back(weightDistanceToTop);
+      //
+      // double weightProduct = weightBrightness * weightDistanceToTop;
+      double weightProduct = weightBrightness;
 
       currentImage->Pixel(x,y) = (1-weightProduct)*currentImage->Pixel(x,y)+weightProduct*skyCurrent.Pixel(x,y);
+      //currentImage->Pixel(x,y) = skyCurrent.Pixel(x,y);
       currentImage->Pixel(x,y).Clamp();
     }
   }
 
 
 
-  
+
 
   //delete V;
   delete nullMatrix;

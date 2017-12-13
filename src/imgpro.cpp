@@ -144,9 +144,12 @@ main(int argc, char **argv)
 	else if (!strcmp(argv[i], "-video")) {
 		printf("Video processing started\n");
 
-		char inputName[100] = "videoinput/input%07d.jpg";
-		char outputName[100] = "videooutput/output%07d.jpg";
+		// char inputName[100] = "videoinput/input%07d.jpg";
+		// char outputName[100] = "videooutput/output%07d.jpg";
     char skyName[100] = "input/sky.jpg";
+
+    char inputName[100] = "videoinput2/input%07d.jpg";
+		char outputName[100] = "videooutput/output_%04d.jpg";
 
 		R2Image *mainImage = new R2Image();
 
@@ -158,7 +161,8 @@ main(int argc, char **argv)
 			exit(-1);
 		}
 		// read very first frame
-		sprintf(currentFilename, inputName, 0);
+		// sprintf(currentFilename, inputName, 0);
+    sprintf(currentFilename, inputName, 137);
 		if (!mainImage->Read(currentFilename)) {
 			fprintf(stderr, "Unable to read first image\n");
 			exit(-1);
@@ -178,8 +182,10 @@ main(int argc, char **argv)
     mainImage -> FirstFrameProcessing(skyImage, skyMatrix);
     std::vector<R2Image::Feature> prevFeatures = mainImage->prevStoredFeature;
 
-		int end = 88;
-		for (int i = 1; i < end; i++)
+		// int end = 88;
+    int end = 137;
+		// for (int i = 1; i < end; i++)
+    for (int i = end-1; i >= 1; i--)
 		{
 			R2Image *currentImage = new R2Image();
       R2Image *prevImage = new R2Image();
