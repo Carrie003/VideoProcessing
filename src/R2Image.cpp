@@ -1116,109 +1116,89 @@ FrameProcessing(R2Image * prevImage, R2Image * currentImage, R2Image * skyImage,
     }
   }
   firstFrameStoredFeature = tempFirstFrameFeature;
-///////////////////////////////////////////////sky replacement: find matching features from first frame
-
-
   prevStoredFeature = temp;
 
-  double** HMatrix2 = dmatrix(1,3,1,3);
-  int inlierNum2 = 0;
-    for (int trial = 0; trial < 10000; trial++){
-    std::vector<Feature> random1;
-    std::vector<Feature> random2;
-    for (int i = 0; i < 4; i++){
-      int randomIndex = int(rand()%temp.size());
-      random1.push_back(temp.at(randomIndex));
-      random2.push_back(firstFrameStoredFeature.at(randomIndex));
-    }
+  
+///////////////////////////////////////////////sky replacement: find matching features from first frame
+  int newSize = firstFrameStoredFeature.size() * 2;
+  double srcPoints[newSize];
+  double mapPoints[newSize];
+  int newCount = 0;
+  int newIndex = 0;
+  while (newCount < newSize/2){
+      srcPoints[2*newCount] = prevStoredFeature[newIndex].centerX;
+      srcPoints[2*newCount+1] = prevStoredFeature[newIndex].centerY;
+      mapPoints[2*newCount] = firstFrameStoredFeature[newIndex].centerX;
+      mapPoints[2*newCount+1] = firstFrameStoredFeature[newIndex].centerY;
+      newCount++;
+      newIndex++;
+  }
+  
+  double** newAMat = dmatrix(1,newSize,1,9);
 
-    R2Point p1(random1.at(0).centerX, random1.at(0).centerY);
-    R2Point p2(random2.at(0).centerX, random2.at(0).centerY);
-    R2Point p3(random1.at(1).centerX, random1.at(1).centerY);
-    R2Point p4(random2.at(1).centerX, random2.at(1).centerY);
-    R2Point p5(random1.at(2).centerX, random1.at(2).centerY);
-    R2Point p6(random2.at(2).centerX, random2.at(2).centerY);
-    R2Point p7(random1.at(3).centerX, random1.at(3).centerY);
-    R2Point p8(random2.at(3).centerX, random2.at(3).centerY);
-
-    R2Point points[] = {p1, p2, p3, p4, p5, p6, p7, p8};
-    double** linEquations = dmatrix(1, 8, 1, 9);
-
-    for (int i = 0 ; i < 4; i++){
-      linEquations[i*2+1][1] = -points[i*2][0];
-      linEquations[i*2+1][2] = -points[i*2][1];
-      linEquations[i*2+1][3] = -1.0;
-      linEquations[i*2+1][4] = 0.0;
-      linEquations[i*2+1][5] = 0.0;
-      linEquations[i*2+1][6] = 0.0;
-      linEquations[i*2+1][7] = points[i*2][0]*points[i*2+1][0];
-      linEquations[i*2+1][8] = points[i*2][1]*points[i*2+1][0];
-      linEquations[i*2+1][9] = points[i*2+1][0];
-
-      linEquations[i*2+2][1] = 0.0;
-      linEquations[i*2+2][2] = 0.0;
-      linEquations[i*2+2][3] = 0.0;
-      linEquations[i*2+2][4] = -points[i*2][0];
-      linEquations[i*2+2][5] = -points[i*2][1];
-      linEquations[i*2+2][6] = -1.0;
-      linEquations[i*2+2][7] = points[i*2][0]*points[i*2+1][1];
-      linEquations[i*2+2][8] = points[i*2][1]*points[i*2+1][1];
-      linEquations[i*2+2][9] = points[i*2+1][1];
-    }
-
-    double singularValues[10];
-    double** nullspaceMatrix = dmatrix(1, 9, 1, 9);
-    svdcmp(linEquations, 8, 9, singularValues, nullspaceMatrix);
-
-    int smallestIndex = 1;
-    for(int i=2;i<10;i++) if(singularValues[i]<singularValues[smallestIndex]) smallestIndex=i;
-
-    double** homographyMatrix = dmatrix(1, 3, 1, 3);
-    homographyMatrix[1][1] = nullspaceMatrix[1][smallestIndex];
-    homographyMatrix[1][2] = nullspaceMatrix[2][smallestIndex];
-    homographyMatrix[1][3] = nullspaceMatrix[3][smallestIndex];
-    homographyMatrix[2][1] = nullspaceMatrix[4][smallestIndex];
-    homographyMatrix[2][2] = nullspaceMatrix[5][smallestIndex];
-    homographyMatrix[2][3] = nullspaceMatrix[6][smallestIndex];
-    homographyMatrix[3][1] = nullspaceMatrix[7][smallestIndex];
-    homographyMatrix[3][2] = nullspaceMatrix[8][smallestIndex];
-    homographyMatrix[3][3] = nullspaceMatrix[9][smallestIndex];
-
-    // find the number of inliers
-    int inlier = 0;
-    for (int num = 0; num < temp.size(); num++){
-      int x1 = temp.at(num).centerX;
-      int y1 = temp.at(num).centerY;
-      int x2 = firstFrameStoredFeature.at(num).centerX;
-      int y2 = firstFrameStoredFeature.at(num).centerY;
-      double hpointZ = homographyMatrix[3][1]*x1+homographyMatrix[3][2]*y1+homographyMatrix[3][3];
-      double hpointX = (homographyMatrix[1][1]*x1+homographyMatrix[1][2]*y1+homographyMatrix[1][3])/hpointZ;
-      double hpointY = (homographyMatrix[2][1]*x1+homographyMatrix[2][2]*y1+homographyMatrix[2][3])/hpointZ;
-
-      if(sqrt(pow(hpointX-x2,2)+pow(hpointY-y2,2)) < 5){
-        inlier ++;
-      }
-    }
-
-    if (trial == 0 || inlier > inlierNum2){
-      HMatrix2 = homographyMatrix;
-      inlierNum2 = inlier;
-      std::cout << "inlier is " << inlierNum << std::endl;
-    }
+    for (int i=0; i < newSize/2; i++) {
+    double x7 = srcPoints[2*i];
+    double y7 = srcPoints[2*i+1];
+    double x8 = mapPoints[2*i];
+    double y8 = mapPoints[2*i+1];
+    newAMat[2*i+1][1] = 0;
+    newAMat[2*i+1][2] = 0;
+    newAMat[2*i+1][3] = 0;
+    newAMat[2*i+1][4] = -x7;
+    newAMat[2*i+1][5] = -y7;
+    newAMat[2*i+1][6] = -1.0;
+    newAMat[2*i+1][7] = y8*x7;
+    newAMat[2*i+1][8] = y8*y7;
+    newAMat[2*i+1][9] = y8;
+    newAMat[2*i+2][1] = x7;
+    newAMat[2*i+2][2] = y7;
+    newAMat[2*i+2][3] = 1.0;
+    newAMat[2*i+2][4] = 0;
+    newAMat[2*i+2][5] = 0;
+    newAMat[2*i+2][6] = 0;
+    newAMat[2*i+2][7] = -x8*x7;
+    newAMat[2*i+2][8] = -x8*y7;
+    newAMat[2*i+2][9] = -x8;
   }
 
+    double newSingularValues[10];
+  double** newNullspaceMatrix = dmatrix(1,newSize+1,1,9);
+  svdcmp(newAMat, newSize, 9, newSingularValues, newNullspaceMatrix);
+
+  // find the smallest singular value:
+  int newSmallestIndex = 1;
+  for(int i=2;i<10;i++) {
+    if(newSingularValues[i]<newSingularValues[newSmallestIndex]) {
+      newSmallestIndex=i;
+    } 
+  }
+
+  double finalMatrix[9];
+  finalMatrix[0] = newNullspaceMatrix[1][newSmallestIndex];
+  finalMatrix[1] = newNullspaceMatrix[2][newSmallestIndex];
+  finalMatrix[2] = newNullspaceMatrix[3][newSmallestIndex];
+  finalMatrix[3] = newNullspaceMatrix[4][newSmallestIndex];
+  finalMatrix[4] = newNullspaceMatrix[5][newSmallestIndex];
+  finalMatrix[5] = newNullspaceMatrix[6][newSmallestIndex];
+  finalMatrix[6] = newNullspaceMatrix[7][newSmallestIndex];
+  finalMatrix[7] = newNullspaceMatrix[8][newSmallestIndex];
+  finalMatrix[8] = newNullspaceMatrix[9][newSmallestIndex];
+
+
+
+  std::cout << "1167" << std::endl;
   for (int x = 0; x < width; x ++) {
     for (int y = 0; y < height; y ++) {
-      double hpointZ = HMatrix2[3][1]*x+HMatrix2[3][2]*y+HMatrix2[3][3];
-      double hpointX = (HMatrix2[1][1]*x+HMatrix2[1][2]*y+HMatrix2[1][3])/hpointZ;
-      double hpointY = (HMatrix2[2][1]*x+HMatrix2[2][2]*y+HMatrix2[2][3])/hpointZ;
+      double hpointZ = finalMatrix[6]*x+finalMatrix[7]*y+finalMatrix[8];
+      double hpointX = (finalMatrix[0]*x+finalMatrix[1]*y+finalMatrix[2])/hpointZ;
+      double hpointY = (finalMatrix[3]*x+finalMatrix[4]*y+finalMatrix[5])/hpointZ;
       if (hpointX > 0 && hpointX < skyImage->width && hpointY > 0 && hpointY < skyImage->height)
       skyCurrent.Pixel(x,y) = skyImage->Pixel(hpointX,hpointY);
     }
   }
+std::cout << "1177" << std::endl;
 
-
-    // Sky replacement
+  // Sky replacement
   std::vector<double> weightBrightnessArray;
   std::vector<double> weightDistanceToTopArray;
   double weightBrightness;

@@ -93,7 +93,7 @@ class R2Image {
       double featureIntensity = feature.HarrisValue[0]+feature.HarrisValue[1]+feature.HarrisValue[2];
       return (double)pow(valueIntensity,2)/(double)pow(featureIntensity,2);
     }
-
+ 
   };
 
   struct PixelDifference
