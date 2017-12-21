@@ -37,7 +37,7 @@ $ src/imgpro -help
 # Image processing (Drag the image into the input folder, put the method name in the end of the command line such as brighntess,blur,harris...)
 $ src/imgpro input/testpattern.jpg output/testpattern_brighntess_0.5.jpg -brightness 0.5
 
-# Video processing (Drag the images of the video into the videoinput folder)
+# Video processing (Drag the images of the video into the videoinput folder; create a new folder called "videooutput" to save the output sequence)
 $ src/imgpro -video
 
 ```
