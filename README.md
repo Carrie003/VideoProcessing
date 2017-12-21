@@ -13,21 +13,23 @@
     output/ - Es empty to start -- it will contain the images produced by your program (see below)
     runme.bat - a script (for Windows) that you will fill in to demonstrate execution of your program
     runme.sh - same as <code>runme.bat, but for Mac OS X
+    
+## Compilation
+### Windows
+If you are developing on a Windows machine and have Visual Studio
+installed, use the provided project solution file (assn1.sln) in the
+src/ directory to build the program. 
+### Mac/Linux machine
+If you are developing on a Mac or Linux machine, cd into the src/ directory and type "make". In either case, an executable called imgpro (or imgpro.exe) will be created in the src/ directory.
 
 
 ## How To Run
-
 ```
 # Clone this repository
 $ git clone https://github.com/XinyuYang/VideoProcessing.git
 
 # Go into the repository
 $ cd VideoProcessing
-
-# make sure the code is up to date
-$ pushd src
-$ make
-$ popd
 
 # To see all the options of operations
 $ src/imgpro -help
@@ -52,6 +54,8 @@ $ ffmpeg -r 24 -f image2 -s 1920x1080 -i videooutput/output%07d.jpg -vcodec libx
 ```
 
 ## Demo
+Link to all test videos:      
+https://drive.google.com/drive/folders/14GVWiPm0vweJ_soODPyko9QYaXaEwfuM?usp=sharing
 
 ## Authors
 * Xinyu Yang
