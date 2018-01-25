@@ -1,4 +1,5 @@
 # VideoProcessing 
+Our code is able to take any picture and replace the sky background of the video. To achieve this goal, we track the video, separate the sky from the rest of the image, and then replace the sky part of the video with an image. In order to separate the sky in each frame, we calculate how likely each pixel is the sky by its brightness and height in each frame. The brighter and higher the pixel is, the more likely it is a pixel of the sky. We then replace each pixel with corresponding pixel in the picture in proportion to its likeness to the sky 
 
 ## File Structure
     src/ - Directory with source code
