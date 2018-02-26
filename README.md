@@ -56,7 +56,7 @@ $ ffmpeg -r 24 -f image2 -s 1920x1080 -i videooutput/output%07d.jpg -vcodec libx
 
 ## Demo
 ![Alt text](img-demo/skyreplacement.png?raw=true "Title")
-Link to all test videos:      
+Link to all test videos:
 https://drive.google.com/drive/folders/1KeugXYiWssy2Q9LSo9bAoQtYl70Z99Oe?usp=sharing
 
 ## Authors
